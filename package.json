@@ -1,0 +1,106 @@
+{
+  "name": "cachepilot",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "CachePilot - Modern PC Cache Cleaner",
+  "main": "dist-electron/main/index.js",
+  "author": "CachePilot",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && electron-builder --win --dir",
+    "build:installer": "vite build && electron-builder --win --dir && node -e \"import('rcedit').then(m => m.rcedit('dist/win-unpacked/CachePilot.exe', { icon: 'build/icon.ico' })).then(() => console.log('Icon patched'))\" && electron-builder --win nsis --prepackaged dist/win-unpacked",
+    "build:icon": "vite build && electron-builder --win --dir && node -e \"import('rcedit').then(m => m.rcedit('dist/win-unpacked/CachePilot.exe', { icon: 'build/icon.ico' })).then(() => console.log('Icon patched'))\"",
+    "build:publish": "vite build && node -e \"import('rcedit').then(m => m.rcedit('dist/win-unpacked/CachePilot.exe', { icon: 'build/icon.ico' })).then(() => console.log('Icon patched'))\" && electron-builder --win nsis --prepackaged dist/win-unpacked --publish always",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "electron-log": "^5.4.4",
+    "electron-updater": "^6.1.7",
+    "lucide-react": "^0.441.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2",
+    "sql.js": "^1.10.3",
+    "zustand": "^4.5.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.4",
+    "@types/react": "^18.3.8",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.20",
+    "electron": "^31.3.1",
+    "electron-builder": "^24.13.3",
+    "postcss": "^8.4.47",
+    "rcedit": "^5.0.2",
+    "sharp": "^0.35.3",
+    "tailwindcss": "^3.4.11",
+    "typescript": "^5.6.2",
+    "vite": "^5.4.6",
+    "vite-plugin-electron": "^0.28.4",
+    "vite-plugin-electron-renderer": "^0.14.5"
+  },
+  "build": {
+    "appId": "com.cachepilot.app",
+    "productName": "CachePilot",
+    "publish": {
+      "provider": "github",
+      "owner": "your-github-username",
+      "repo": "CachePilot",
+      "releaseType": "release"
+    },
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "dist-electron/**/*",
+      "dist/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "build/icon.ico",
+        "to": "icon.ico"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "dir",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": false,
+      "requestedExecutionLevel": "requireAdministrator"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "CachePilot",
+      "uninstallDisplayName": "CachePilot",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico",
+      "license": "build/license.txt",
+      "installerLanguages": ["en_US"],
+      "language": "2052",
+      "warningsAsErrors": false,
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false
+    },
+    "forceCodeSigning": false
+  }
+}
