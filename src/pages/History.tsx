@@ -27,19 +27,19 @@ export function History() {
   const lastTwoScans = scanHistory.length >= 2 ? [scanHistory[0], scanHistory[1]] : null;
   const comparison = lastTwoScans ? (() => {
     const [newer, older] = lastTwoScans;
-    const sizeDiff = newer.totalSize - older.totalSize;
-    const itemDiff = newer.itemCount - older.itemCount;
-    const catDiffs = newer.categories.map((newCat) => {
-      const oldCat = older.categories.find((c) => c.categoryId === newCat.categoryId);
+    const sizeDiff = (newer.totalSize ?? 0) - (older.totalSize ?? 0);
+    const itemDiff = (newer.itemCount ?? 0) - (older.itemCount ?? 0);
+    const catDiffs = (newer.categories ?? []).map((newCat) => {
+      const oldCat = (older.categories ?? []).find((c) => c.categoryId === newCat.categoryId);
       return {
         categoryId: newCat.categoryId,
         name: newCat.name,
         oldSize: oldCat?.totalSize ?? 0,
-        newSize: newCat.totalSize,
-        diff: newCat.totalSize - (oldCat?.totalSize ?? 0),
+        newSize: newCat.totalSize ?? 0,
+        diff: (newCat.totalSize ?? 0) - (oldCat?.totalSize ?? 0),
         oldCount: oldCat?.itemCount ?? 0,
-        newCount: newCat.itemCount,
-        countDiff: newCat.itemCount - (oldCat?.itemCount ?? 0),
+        newCount: newCat.itemCount ?? 0,
+        countDiff: (newCat.itemCount ?? 0) - (oldCat?.itemCount ?? 0),
       };
     }).filter((d) => d.diff !== 0).sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff));
     return { sizeDiff, itemDiff, catDiffs, newer, older };
