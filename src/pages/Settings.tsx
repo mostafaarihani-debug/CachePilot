@@ -91,10 +91,10 @@ export function Settings() {
   useEffect(() => {
     const api = window.electronAPI;
     if (!api) return;
-    api.getSettings().then(setSettings);
-    api.getAppInfo().then(setAppInfo);
-    api.getUpdateStatus().then(setUpdateStatus);
-    api.getScheduledScan().then(setIsTaskScheduled);
+    api.getSettings().then(setSettings).catch(() => {});
+    api.getAppInfo().then(setAppInfo).catch(() => {});
+    api.getUpdateStatus().then(setUpdateStatus).catch(() => {});
+    api.getScheduledScan().then(setIsTaskScheduled).catch(() => {});
 
     api.onUpdateStatus((status: UpdateStatus) => {
       setUpdateStatus(status);

@@ -406,19 +406,32 @@ ipcMain.handle('quit-and-install', () => {
 });
 
 ipcMain.handle('get-update-status', () => {
-  return getUpdateStatus();
+  try {
+    const status = getUpdateStatus();
+    return {
+      status: status.isChecking ? 'checking' : status.updateAvailable ? 'available' : 'idle',
+    };
+  } catch (err) {
+    log.error('get-update-status failed', err);
+    return { status: 'idle' };
+  }
 });
 
 ipcMain.handle('get-app-info', () => {
-  return {
-    version: app.getVersion(),
-    name: app.getName(),
-    platform: process.platform,
-    arch: process.arch,
-    electronVersion: process.versions.electron,
-    chromeVersion: process.versions.chrome,
-    nodeVersion: process.versions.node,
-  };
+  try {
+    return {
+      version: app.getVersion(),
+      name: app.getName(),
+      platform: process.platform,
+      arch: process.arch,
+      electronVersion: process.versions.electron,
+      chromeVersion: process.versions.chrome,
+      nodeVersion: process.versions.node,
+    };
+  } catch (err) {
+    log.error('get-app-info failed', err);
+    return { version: '1.0.0', name: 'CachePilot', platform: process.platform, arch: process.arch, electronVersion: '', chromeVersion: '', nodeVersion: '' };
+  }
 });
 
 const SCHEDULED_TASK_NAME = 'CachePilot Scheduled Scan';

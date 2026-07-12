@@ -62,6 +62,10 @@
       {
         "from": "build/icon.ico",
         "to": "icon.ico"
+      },
+      {
+        "from": "build/app-update.yml",
+        "to": "app-update.yml"
       }
     ],
     "win": {

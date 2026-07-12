@@ -1,0 +1,4 @@
+provider: github
+owner: mostafaarihani-debug
+repo: CachePilot
+releaseType: release
