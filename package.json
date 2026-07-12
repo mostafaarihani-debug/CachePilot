@@ -1,6 +1,6 @@
 {
   "name": "cachepilot",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "CachePilot - Modern PC Cache Cleaner",
   "main": "dist-electron/main/index.js",
@@ -95,7 +95,9 @@
       "uninstallerIcon": "build/icon.ico",
       "installerHeaderIcon": "build/icon.ico",
       "license": "build/license.txt",
-      "installerLanguages": ["en_US"],
+      "installerLanguages": [
+        "en_US"
+      ],
       "language": "2052",
       "warningsAsErrors": false,
       "runAfterFinish": true,
