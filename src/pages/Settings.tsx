@@ -385,7 +385,7 @@ export function Settings() {
 
                 {updateStatus.releaseNotes && updateStatus.status !== 'not-available' && (
                   <div className="mt-3 p-2 rounded bg-surface-2 text-xs text-txt-muted whitespace-pre-wrap max-h-24 overflow-auto">
-                    {updateStatus.releaseNotes}
+                    {updateStatus.releaseNotes.replace(/<[^>]*>/g, '').trim()}
                   </div>
                 )}
               </div>
