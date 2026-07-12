@@ -47,7 +47,7 @@
     "productName": "CachePilot",
     "publish": {
       "provider": "github",
-      "owner": "your-github-username",
+      "owner": "mostafaarihani-debug",
       "repo": "CachePilot",
       "releaseType": "release"
     },
