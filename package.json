@@ -1,6 +1,6 @@
 {
   "name": "cachepilot",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "type": "module",
   "description": "CachePilot - Modern PC Cache Cleaner",
   "main": "dist-electron/main/index.js",
