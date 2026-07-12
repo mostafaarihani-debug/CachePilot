@@ -158,7 +158,7 @@ export function Settings() {
   if (!settings) return null;
 
   const StatusIcon = UPDATE_STATUS_ICONS[updateStatus.status] || RefreshCw;
-  const isUpdating = updateStatus.status === 'checking' || updateStatus.status === 'downloading';
+  const isUpdating = updateStatus.status === 'checking';
 
   return (
     <div className="flex-1 p-8 overflow-auto">
