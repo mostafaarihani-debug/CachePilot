@@ -1,6 +1,6 @@
 import { addHistoryEvent, saveCleanupAction } from '../db/queries';
 import { generateId } from '../db/database';
-import { getScanCacheFiles } from '../store';
+import { getScanCacheFiles, formatSize } from '../store';
 import type { CleanupAction, CategoryResult } from '../types';
 
 export interface CleanupResult {
@@ -137,17 +137,9 @@ export async function runCleanup(
 
   addHistoryEvent(
     'cleanup',
-    `Cleaned ${report.totalItemsCleaned} items, freed ${formatBytes(report.totalSizeFreed)}.`,
+    `Cleaned ${report.totalItemsCleaned} items, freed ${formatSize(report.totalSizeFreed)}.`,
     JSON.stringify({ reportId: report.id, success: report.allSucceeded })
   );
 
   return report;
-}
-
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B';
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const k = 1024;
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${units[i]}`;
 }

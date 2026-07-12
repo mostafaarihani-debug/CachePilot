@@ -16,6 +16,7 @@ import {
   Globe,
   Cpu,
   Calendar,
+  FolderOpen,
 } from 'lucide-react';
 import type { AppSettings, AppInfo, UpdateStatus } from '../types';
 import { useToastStore } from '../store/toastStore';
@@ -446,6 +447,39 @@ export function Settings() {
                   <p className="text-xs text-txt-muted">
                     CachePilot stores all data locally on your PC. Nothing is sent to the internet.
                   </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Logs */}
+        <div className="card">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-lg bg-surface-3 flex items-center justify-center">
+              <FolderOpen className="w-5 h-5 text-txt-secondary" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-base font-semibold text-txt mb-1">Logs</h3>
+              <p className="text-sm text-txt-secondary mb-4">
+                View application logs for troubleshooting
+              </p>
+
+              <div className="p-3 rounded-lg bg-surface">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <FolderOpen className="w-4 h-4 text-txt-muted" />
+                    <div>
+                      <span className="text-sm text-txt block">Application logs</span>
+                      <span className="text-xs text-txt-muted">View scan and error logs stored on your PC</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => window.electronAPI?.openLogsFolder()}
+                    className="px-3 py-1.5 text-xs font-medium bg-surface-3 text-txt rounded-lg hover:bg-surface-2 transition-colors"
+                  >
+                    Open Logs Folder
+                  </button>
                 </div>
               </div>
             </div>

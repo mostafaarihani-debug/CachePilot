@@ -29,6 +29,7 @@ export interface ScanSession {
   status: 'completed' | 'in_progress' | 'failed';
   cleanedAt?: string;
   sizeFreed?: number;
+  itemsCleaned?: number;
 }
 
 export interface CategoryResult {
@@ -147,6 +148,7 @@ export interface ElectronAPI {
   setScheduledScan: (intervalMinutes: number) => Promise<boolean>;
   getScheduledScan: () => Promise<boolean>;
   cancelScheduledScan: () => Promise<boolean>;
+  openLogsFolder: () => Promise<boolean>;
 }
 
 declare global {

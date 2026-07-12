@@ -7,6 +7,14 @@ import { scanAllCaches, scanAllCachesWithProgress, deleteCacheFiles } from './sc
 import log from './logger';
 import { initUpdater, checkForUpdates, downloadUpdate, quitAndInstall, getUpdateStatus } from './updater';
 
+process.on('uncaughtException', (err) => {
+  log.error('Uncaught exception in main process', err);
+});
+
+process.on('unhandledRejection', (reason) => {
+  log.error('Unhandled rejection in main process', reason);
+});
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const VITE_DEV_SERVER_URL = process.env.VITE_DEV_SERVER_URL;
 
@@ -484,4 +492,18 @@ ipcMain.handle('get-scheduled-scan', () => {
 
 ipcMain.handle('cancel-scheduled-scan', () => {
   return deleteScheduledTask();
+});
+
+ipcMain.handle('open-logs-folder', async () => {
+  try {
+    const logDir = path.dirname(log.transports.file.getFile().path);
+    if (!fs.existsSync(logDir)) {
+      fs.mkdirSync(logDir, { recursive: true });
+    }
+    await shell.openPath(logDir);
+    return true;
+  } catch (err) {
+    log.error('Failed to open logs folder', err);
+    return false;
+  }
 });

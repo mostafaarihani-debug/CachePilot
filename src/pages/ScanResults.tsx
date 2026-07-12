@@ -130,12 +130,14 @@ export function ScanResults() {
         itemCount: updatedItemCount,
         cleanedAt: new Date().toISOString(),
         sizeFreed,
+        itemsCleaned: report.totalItemsCleaned,
       };
 
       useAppStore.getState().setLatestScan(updatedSession);
       updateScanSession(latestScan.id, {
         cleanedAt: updatedSession.cleanedAt,
         sizeFreed: updatedSession.sizeFreed,
+        itemsCleaned: updatedSession.itemsCleaned,
         categories: updatedCategories,
         totalSize: updatedTotalSize,
         itemCount: updatedItemCount,

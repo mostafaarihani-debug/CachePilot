@@ -13,6 +13,9 @@ import {
 } from 'lucide-react';
 import { ScanProgress } from '../components/ScanProgress';
 import { DashboardSkeleton } from '../components/Skeleton';
+import { RecommendationsCard } from '../components/RecommendationsCard';
+import { HealthScoreCard } from '../components/HealthScoreCard';
+import { LifetimeStatsCard } from '../components/LifetimeStatsCard';
 
 export function Dashboard() {
   const { latestScan, isScanning, setCurrentPage } = useAppStore();
@@ -129,6 +132,13 @@ export function Dashboard() {
             </p>
           </div>
         </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <HealthScoreCard />
+          <RecommendationsCard />
+        </div>
+
+        <LifetimeStatsCard />
 
         {latestScan ? (
           <div className="card-elevated">

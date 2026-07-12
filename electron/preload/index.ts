@@ -28,4 +28,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setScheduledScan: (intervalMinutes: number) => ipcRenderer.invoke('set-scheduled-scan', intervalMinutes),
   getScheduledScan: () => ipcRenderer.invoke('get-scheduled-scan'),
   cancelScheduledScan: () => ipcRenderer.invoke('cancel-scheduled-scan'),
+  openLogsFolder: () => ipcRenderer.invoke('open-logs-folder'),
 });

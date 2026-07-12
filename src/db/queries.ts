@@ -33,7 +33,7 @@ function storeHistory(events: HistoryEvent[]): void {
 export function saveScanSession(session: ScanSession): void {
   const scans = getStoredScans();
   scans.unshift(session);
-  if (scans.length > 50) scans.pop();
+  if (scans.length > 200) scans.pop();
   storeScans(scans);
 }
 
@@ -42,7 +42,7 @@ export function getLatestScan(): ScanSession | null {
   return scans.length > 0 ? scans[0] : null;
 }
 
-export function getScanHistory(limit: number = 50): ScanSession[] {
+export function getScanHistory(limit: number = 200): ScanSession[] {
   return getStoredScans().slice(0, limit);
 }
 

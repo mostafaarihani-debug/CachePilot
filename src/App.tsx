@@ -1,15 +1,19 @@
-import React from 'react';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { Sidebar } from './components/Sidebar';
-import { Dashboard } from './pages/Dashboard';
-import { ScanResults } from './pages/ScanResults';
-import { History } from './pages/History';
-import { Settings } from './pages/Settings';
 import { useAppStore, loadInitialData } from './store';
 import ToastContainer from './components/ToastContainer';
 import { useToastStore } from './store/toastStore';
 import type { UpdateStatus } from './types';
 import { PageErrorBoundary } from './components/PageErrorBoundary';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { WelcomeWizard, hasCompletedWizard } from './components/WelcomeWizard';
+import { initCrashReporter } from './utils/crashReporter';
+import { DashboardSkeleton } from './components/Skeleton';
+
+const Dashboard = lazy(() => import('./pages/Dashboard').then((m) => ({ default: m.Dashboard })));
+const ScanResults = lazy(() => import('./pages/ScanResults').then((m) => ({ default: m.ScanResults })));
+const History = lazy(() => import('./pages/History').then((m) => ({ default: m.History })));
+const Settings = lazy(() => import('./pages/Settings').then((m) => ({ default: m.Settings })));
 
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -42,12 +46,35 @@ function AppContent() {
   const addToast = useToastStore((s) => s.addToast);
   useKeyboardShortcuts();
 
-  React.useEffect(() => {
+  const [showWizard, setShowWizard] = useState(false);
+  const [wizardChecked, setWizardChecked] = useState(false);
+
+  useEffect(() => {
+    initCrashReporter();
     console.log('CachePilot: App mounted');
     loadInitialData();
 
+    if (!hasCompletedWizard()) {
+      setShowWizard(true);
+    }
+    setWizardChecked(true);
+
     const api = window.electronAPI;
     if (!api) return;
+
+    api.isAdmin().then((isAdm) => {
+      if (!isAdm) {
+        const delay = hasCompletedWizard() ? 1500 : 6000;
+        setTimeout(() => {
+          addToast({
+            type: 'warning',
+            title: 'Admin Access Recommended',
+            message: 'Run CachePilot as administrator for full cleanup access. Some locked files cannot be cleaned without it.',
+            duration: 10000,
+          });
+        }, delay);
+      }
+    });
 
     api.onUpdateStatus((status: UpdateStatus) => {
       switch (status.status) {
@@ -79,6 +106,8 @@ function AppContent() {
     });
   }, []);
 
+  if (!wizardChecked) return null;
+
   const renderPage = () => {
     switch (currentPage) {
       case 'dashboard':
@@ -95,13 +124,18 @@ function AppContent() {
   };
 
   return (
-    <div className="dark h-screen w-screen flex overflow-hidden" style={{ background: 'rgb(15, 17, 21)', color: 'rgb(232, 237, 245)' }}>
-      <Sidebar />
-      <main className="flex-1 flex flex-col overflow-hidden">
-        {renderPage()}
-      </main>
-      <ToastContainer />
-    </div>
+    <>
+      {showWizard && <WelcomeWizard onComplete={() => setShowWizard(false)} />}
+      <div className="dark h-screen w-screen flex overflow-hidden" style={{ background: 'rgb(15, 17, 21)', color: 'rgb(232, 237, 245)' }}>
+        <Sidebar />
+        <main className="flex-1 flex flex-col overflow-hidden">
+          <Suspense fallback={<DashboardSkeleton />}>
+            {renderPage()}
+          </Suspense>
+        </main>
+        <ToastContainer />
+      </div>
+    </>
   );
 }
 

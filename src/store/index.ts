@@ -42,7 +42,6 @@ export async function runScan(): Promise<ScanSession> {
 
   if (window.electronAPI) {
     try {
-      // Listen for progress events
       const progressHandler = (data: ScanProgress) => {
         const current = useAppStore.getState().scanProgress;
         const existing = current.findIndex((p) => p.categoryId === data.categoryId);
