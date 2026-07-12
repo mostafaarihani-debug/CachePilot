@@ -47,30 +47,7 @@ CachePilot solves that by making cache cleanup:
 - App-specific cache.
 - Log files.
 
-## Project structure
 
-```text
-project-root/
-  CLAUDE.md
-  ARCHITECTURE.md
-  PRODUCT.md
-  UX_GUIDELINES.md
-  CACHE_GUIDE.md
-  SKILLS.md
-  ROADMAP.md
-  FIX_ACTIONS.md
-  TESTING.md
-  README.md
-
-  .claude/
-    skills/
-      cache-cleanup/
-        SKILL.md
-      ui-design/
-        SKILL.md
-      docs/
-        SKILL.md
-```
 
 ## Design direction
 
