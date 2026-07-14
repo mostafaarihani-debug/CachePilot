@@ -113,6 +113,23 @@ export interface UpdateStatus {
   message?: string;
 }
 
+export interface LicenseStatus {
+  tier: 'free' | 'pro';
+  isValid: boolean;
+  licenseKey?: string;
+  activatedAt?: string;
+  expiresAt?: string | null;
+  deviceName?: string;
+  error?: string;
+}
+
+export interface ScanCountInfo {
+  count: number;
+  limit: number;
+  canScan: boolean;
+  isPro: boolean;
+}
+
 export interface ElectronAPI {
   getDbPath: () => Promise<string>;
   openExternal: (url: string) => Promise<void>;
@@ -149,6 +166,12 @@ export interface ElectronAPI {
   getScheduledScan: () => Promise<boolean>;
   cancelScheduledScan: () => Promise<boolean>;
   openLogsFolder: () => Promise<boolean>;
+  activateLicense: (key: string) => Promise<{ success: boolean; status: LicenseStatus; error?: string }>;
+  getLicenseStatus: () => Promise<LicenseStatus>;
+  deactivateLicense: () => Promise<{ success: boolean }>;
+  getScanCount: () => Promise<ScanCountInfo>;
+  checkScanLimit: () => Promise<ScanCountInfo>;
+  onLicenseStatus: (callback: (status: LicenseStatus) => void) => void;
 }
 
 declare global {
@@ -172,4 +195,8 @@ export interface AppState {
   setScanHistory: (history: ScanSession[]) => void;
   settings: UserSetting[];
   setSettings: (settings: UserSetting[]) => void;
+  licenseStatus: LicenseStatus | null;
+  setLicenseStatus: (status: LicenseStatus | null) => void;
+  scanCountInfo: ScanCountInfo | null;
+  setScanCountInfo: (info: ScanCountInfo | null) => void;
 }

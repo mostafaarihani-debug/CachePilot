@@ -6,6 +6,8 @@ import { execSync } from 'node:child_process';
 import { scanAllCaches, scanAllCachesWithProgress, deleteCacheFiles } from './scanner';
 import log from './logger';
 import { initUpdater, checkForUpdates, downloadUpdate, quitAndInstall, getUpdateStatus } from './updater';
+import { activateLicense, getLicenseStatus, deactivateLicense, validateAndRefreshLicense } from './license';
+import { getScanCountForTier, incrementScanCount, canScan } from './scanCounter';
 
 process.on('uncaughtException', (err) => {
   log.error('Uncaught exception in main process', err);
@@ -87,6 +89,18 @@ function stopAutoScanTimer() {
   }
 }
 
+function getNotificationIcon() {
+  const paths = [
+    path.join(process.resourcesPath, 'icon.ico'),
+    path.join(__dirname, '../../build/icon.ico'),
+    path.join(__dirname, '../../dist/icon.ico'),
+  ];
+  for (const p of paths) {
+    if (fs.existsSync(p)) return p;
+  }
+  return undefined;
+}
+
 function performBackgroundScan() {
   if (!mainWindow) return;
   const settings = loadSettings();
@@ -100,11 +114,21 @@ function performBackgroundScan() {
 
     if (settings.showNotifications && totalSize >= thresholdBytes) {
       const sizeMB = (totalSize / (1024 * 1024)).toFixed(0);
-      new Notification({
+      const icon = getNotificationIcon();
+      const n = new Notification({
         title: 'CachePilot',
         body: `Found ${totalItems} cache files (${sizeMB} MB). Click to review and clean.`,
+        icon,
         silent: false,
-      }).show();
+      });
+      n.on('click', () => {
+        if (mainWindow) {
+          mainWindow.show();
+          mainWindow.focus();
+          mainWindow.webContents.send('trigger-scan');
+        }
+      });
+      n.show();
     }
 
     mainWindow.webContents.send('background-scan-complete', {
@@ -275,11 +299,15 @@ if (!gotLock) {
     }
   });
 
-  app.whenReady().then(() => {
+  app.whenReady().then(async () => {
     log.info('CachePilot starting', { version: app.getVersion(), platform: process.platform, arch: process.arch });
     const settings = loadSettings();
     applyAutoStart(settings.autoStart);
     createTray();
+
+    // Validate license on startup
+    const licenseStatus = await validateAndRefreshLicense();
+    log.info('License status', { tier: licenseStatus.tier, isValid: licenseStatus.isValid });
 
     const isAutoStart = process.argv.includes('--auto-start');
     const startMinimized = isAutoStart;
@@ -287,6 +315,11 @@ if (!gotLock) {
     createWindow(startMinimized);
     initAutoScan(settings);
     log.info('CachePilot ready');
+
+    // Send license status to renderer after window is ready
+    mainWindow?.once('ready-to-show', () => {
+      sendLicenseStatus();
+    });
 
     if (isAutoStart) {
       const tryNotify = (attempts: number) => {
@@ -299,6 +332,13 @@ if (!gotLock) {
           const n = new Notification({
             title: 'CachePilot',
             body: 'Running in the background. Double-click the tray icon to open.',
+            icon: getNotificationIcon(),
+          });
+          n.on('click', () => {
+            if (mainWindow) {
+              mainWindow.show();
+              mainWindow.focus();
+            }
           });
           n.show();
         } catch {
@@ -507,3 +547,40 @@ ipcMain.handle('open-logs-folder', async () => {
     return false;
   }
 });
+
+// --- License IPC Handlers ---
+
+ipcMain.handle('activate-license', async (_event, licenseKey: string) => {
+  return await activateLicense(licenseKey);
+});
+
+ipcMain.handle('get-license-status', () => {
+  return getLicenseStatus();
+});
+
+ipcMain.handle('deactivate-license', () => {
+  return deactivateLicense();
+});
+
+ipcMain.handle('get-scan-count', () => {
+  const license = getLicenseStatus();
+  return getScanCountForTier(license.tier === 'pro' && license.isValid);
+});
+
+ipcMain.handle('check-scan-limit', () => {
+  const license = getLicenseStatus();
+  const isPro = license.tier === 'pro' && license.isValid;
+  const allowed = canScan(isPro);
+  if (allowed && !isPro) {
+    incrementScanCount();
+  }
+  return getScanCountForTier(isPro);
+});
+
+// Send license status to renderer on startup
+function sendLicenseStatus() {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    const status = getLicenseStatus();
+    mainWindow.webContents.send('license-status', status);
+  }
+}

@@ -29,4 +29,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getScheduledScan: () => ipcRenderer.invoke('get-scheduled-scan'),
   cancelScheduledScan: () => ipcRenderer.invoke('cancel-scheduled-scan'),
   openLogsFolder: () => ipcRenderer.invoke('open-logs-folder'),
+  activateLicense: (key: string) => ipcRenderer.invoke('activate-license', key),
+  getLicenseStatus: () => ipcRenderer.invoke('get-license-status'),
+  deactivateLicense: () => ipcRenderer.invoke('deactivate-license'),
+  getScanCount: () => ipcRenderer.invoke('get-scan-count'),
+  checkScanLimit: () => ipcRenderer.invoke('check-scan-limit'),
+  onLicenseStatus: (callback: (status: unknown) => void) =>
+    ipcRenderer.on('license-status', (_event: unknown, status: unknown) => callback(status)),
 });

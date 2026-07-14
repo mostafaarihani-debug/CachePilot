@@ -81,6 +81,7 @@ export function ScanResults() {
   const handleScan = async () => {
     setCleanupReport(null);
     const scan = await runScan();
+    if (!scan) return; // Scan limit reached
     const safeIds = scan.categories
       .filter((c) => c.safetyLevel === 'safe' && c.itemCount > 0)
       .map((c) => c.categoryId);

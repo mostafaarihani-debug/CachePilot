@@ -16,9 +16,12 @@ import {
 } from 'lucide-react';
 import { CategoryIcon } from '../components/CategoryIcon';
 import { exportAsJSON, exportAsCSV } from '../utils/export';
+import { ProBadge } from '../components/ProBadge';
+import { isPro } from '../utils/isPro';
 
 export function History() {
-  const { scanHistory } = useAppStore();
+  const { scanHistory, licenseStatus } = useAppStore();
+  const userIsPro = isPro(licenseStatus);
 
   const totalScans = scanHistory.length;
   const cleanedSessions = scanHistory.filter((s) => s.cleanedAt);
@@ -197,21 +200,35 @@ export function History() {
             </div>
 
             {/* Export Buttons */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => exportAsJSON(scanHistory)}
-                className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-surface border border-bdr rounded-lg text-txt-secondary hover:bg-surface-2 hover:text-txt transition-colors"
-              >
-                <Download className="w-3.5 h-3.5" />
-                Export JSON
-              </button>
-              <button
-                onClick={() => exportAsCSV(scanHistory)}
-                className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-surface border border-bdr rounded-lg text-txt-secondary hover:bg-surface-2 hover:text-txt transition-colors"
-              >
-                <Download className="w-3.5 h-3.5" />
-                Export CSV
-              </button>
+            <div className="flex gap-2 items-center">
+              {userIsPro ? (
+                <>
+                  <button
+                    onClick={() => exportAsJSON(scanHistory)}
+                    className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-surface border border-bdr rounded-lg text-txt-secondary hover:bg-surface-2 hover:text-txt transition-colors"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    Export JSON
+                  </button>
+                  <button
+                    onClick={() => exportAsCSV(scanHistory)}
+                    className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-surface border border-bdr rounded-lg text-txt-secondary hover:bg-surface-2 hover:text-txt transition-colors"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    Export CSV
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => {}}
+                  disabled
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-surface border border-bdr rounded-lg text-txt-muted cursor-not-allowed opacity-60"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Export
+                  <ProBadge size="sm" />
+                </button>
+              )}
             </div>
 
             {/* Session Cards */}

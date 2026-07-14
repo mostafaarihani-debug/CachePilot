@@ -17,9 +17,14 @@ import {
   Cpu,
   Calendar,
   FolderOpen,
+  Key,
+  Crown,
 } from 'lucide-react';
 import type { AppSettings, AppInfo, UpdateStatus } from '../types';
 import { useToastStore } from '../store/toastStore';
+import { useAppStore } from '../store';
+import { ProBadge } from '../components/ProBadge';
+import { isPro } from '../utils/isPro';
 
 const INTERVAL_OPTIONS = [
   { label: 'Off', value: 0 },
@@ -88,6 +93,8 @@ export function Settings() {
   const [updateStatus, setUpdateStatus] = useState<UpdateStatus>({ status: 'idle' });
   const [isTaskScheduled, setIsTaskScheduled] = useState(false);
   const addToast = useToastStore((s) => s.addToast);
+  const { licenseStatus, setLicenseStatus } = useAppStore();
+  const userIsPro = isPro(licenseStatus);
 
   useEffect(() => {
     const api = window.electronAPI;
@@ -137,6 +144,14 @@ export function Settings() {
   };
 
   const handleToggleScheduledScan = async (enabled: boolean) => {
+    if (!userIsPro) {
+      addToast({
+        type: 'info',
+        title: 'Pro Feature',
+        message: 'Scheduled scans require CachePilot Pro. Upgrade to unlock.',
+      });
+      return;
+    }
     const api = window.electronAPI;
     if (!api) return;
     if (enabled) {
@@ -153,6 +168,16 @@ export function Settings() {
       if (ok) {
         addToast({ type: 'info', title: 'Schedule Cancelled', message: 'Windows scheduled scan removed' });
       }
+    }
+  };
+
+  const handleProFeatureClick = () => {
+    if (!userIsPro) {
+      addToast({
+        type: 'info',
+        title: 'Pro Feature',
+        message: 'This feature requires CachePilot Pro. Upgrade to unlock.',
+      });
     }
   };
 
@@ -193,26 +218,35 @@ export function Settings() {
                   <Toggle enabled={settings.autoStart} onToggle={() => update({ autoStart: !settings.autoStart })} />
                 </label>
 
-                <label className="flex items-center justify-between p-3 rounded-lg bg-surface">
+                <label
+                  className={`flex items-center justify-between p-3 rounded-lg bg-surface ${!userIsPro ? 'opacity-60' : ''}`}
+                  onClick={!userIsPro ? handleProFeatureClick : undefined}
+                >
                   <div className="flex items-center gap-3">
                     <Info className="w-4 h-4 text-txt-muted" />
                     <span className="text-sm text-txt">Auto-scan on startup</span>
+                    {!userIsPro && <ProBadge size="sm" />}
                   </div>
                   <Toggle
                     enabled={settings.autoScanOnStartup}
-                    onToggle={() => update({ autoScanOnStartup: !settings.autoScanOnStartup })}
+                    onToggle={() => userIsPro && update({ autoScanOnStartup: !settings.autoScanOnStartup })}
                   />
                 </label>
 
-                <div className="p-3 rounded-lg bg-surface">
+                <div
+                  className={`p-3 rounded-lg bg-surface ${!userIsPro ? 'opacity-60' : ''}`}
+                  onClick={!userIsPro ? handleProFeatureClick : undefined}
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <Clock className="w-4 h-4 text-txt-muted" />
                       <span className="text-sm text-txt">Background scan interval</span>
+                      {!userIsPro && <ProBadge size="sm" />}
                     </div>
                     <select
                       value={settings.autoScanInterval}
-                      onChange={(e) => update({ autoScanInterval: Number(e.target.value) })}
+                      onChange={(e) => userIsPro && update({ autoScanInterval: Number(e.target.value) })}
+                      disabled={!userIsPro}
                       className="bg-surface-2 border border-bdr rounded-lg px-3 py-1.5 text-sm text-txt cursor-pointer outline-none focus:border-primary"
                     >
                       {INTERVAL_OPTIONS.map((opt) => (
@@ -276,13 +310,17 @@ export function Settings() {
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-3 rounded-lg bg-surface">
+                <label
+                  className={`flex items-center justify-between p-3 rounded-lg bg-surface ${!userIsPro ? 'opacity-60' : ''}`}
+                  onClick={!userIsPro ? handleProFeatureClick : undefined}
+                >
                   <div className="flex items-center gap-3">
                     <Calendar className="w-4 h-4 text-txt-muted" />
                     <div>
                       <span className="text-sm text-txt block">Scheduled scan (Windows Task Scheduler)</span>
                       <span className="text-xs text-txt-muted">Runs scan every hour via Windows Task Scheduler</span>
                     </div>
+                    {!userIsPro && <ProBadge size="sm" />}
                   </div>
                   <Toggle
                     enabled={isTaskScheduled}
@@ -448,6 +486,94 @@ export function Settings() {
                     CachePilot stores all data locally on your PC. Nothing is sent to the internet.
                   </p>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* License */}
+        <div className="card">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Crown className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-base font-semibold text-txt mb-1">License</h3>
+              <p className="text-sm text-txt-secondary mb-4">
+                Manage your CachePilot license
+              </p>
+
+              <div className="p-3 rounded-lg bg-surface">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <Key className="w-4 h-4 text-txt-muted" />
+                    <div>
+                      <span className="text-sm text-txt block">
+                        {userIsPro ? 'CachePilot Pro' : 'CachePilot Free'}
+                      </span>
+                      {userIsPro && licenseStatus?.licenseKey && (
+                        <span className="text-xs text-txt-muted font-mono">
+                          {licenseStatus.licenseKey.slice(0, 8)}...
+                        </span>
+                      )}
+                      {!userIsPro && (
+                        <span className="text-xs text-txt-muted">3 scans per day</span>
+                      )}
+                    </div>
+                  </div>
+                  {userIsPro ? (
+                    <span
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: 8,
+                        background: 'rgba(56, 210, 122, 0.1)',
+                        border: '1px solid rgba(56, 210, 122, 0.25)',
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: 'rgb(56, 210, 122)',
+                      }}
+                    >
+                      Active
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => window.electronAPI?.openExternal('https://cachepilot.gumroad.com/l/cache-pilot')}
+                      className="px-3 py-1.5 text-xs font-medium bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors"
+                    >
+                      Upgrade
+                    </button>
+                  )}
+                </div>
+
+                {userIsPro && licenseStatus?.expiresAt && (
+                  <div className="flex items-center justify-between text-xs text-txt-muted pt-2 border-t border-bdr">
+                    <span>Expires</span>
+                    <span>{new Date(licenseStatus.expiresAt).toLocaleDateString()}</span>
+                  </div>
+                )}
+
+                {userIsPro && (
+                  <div className="pt-2 mt-2 border-t border-bdr">
+                    <button
+                      onClick={async () => {
+                        if (window.electronAPI) {
+                          const result = await window.electronAPI.deactivateLicense();
+                          if (result.success) {
+                            setLicenseStatus({ tier: 'free', isValid: false });
+                            addToast({
+                              type: 'info',
+                              title: 'License Deactivated',
+                              message: 'CachePilot has been downgraded to Free.',
+                            });
+                          }
+                        }
+                      }}
+                      className="text-xs text-red-400 hover:text-red-300 transition-colors"
+                    >
+                      Deactivate license
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

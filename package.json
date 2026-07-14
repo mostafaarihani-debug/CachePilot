@@ -18,6 +18,7 @@
   "dependencies": {
     "electron-log": "^5.4.4",
     "electron-updater": "^6.1.7",
+    "gumroad-license-lite": "github:apecollective/gumroad-license-lite",
     "lucide-react": "^0.441.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

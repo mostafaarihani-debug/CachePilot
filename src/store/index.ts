@@ -22,6 +22,12 @@ export const useAppStore = create<AppState>((set) => ({
 
   settings: [],
   setSettings: (settings) => set({ settings }),
+
+  licenseStatus: null,
+  setLicenseStatus: (status) => set({ licenseStatus: status }),
+
+  scanCountInfo: null,
+  setScanCountInfo: (info) => set({ scanCountInfo: info }),
 }));
 
 let scanCacheFiles: Map<string, CacheFile[]> = new Map();
@@ -30,8 +36,22 @@ export function getScanCacheFiles(): Map<string, CacheFile[]> {
   return scanCacheFiles;
 }
 
-export async function runScan(): Promise<ScanSession> {
+export async function runScan(): Promise<ScanSession | null> {
   const store = useAppStore.getState();
+
+  // Check scan limit before scanning
+  if (window.electronAPI) {
+    try {
+      const scanInfo = await window.electronAPI.checkScanLimit();
+      store.setScanCountInfo(scanInfo);
+      if (!scanInfo.canScan) {
+        return null; // Limit reached, caller should show upgrade modal
+      }
+    } catch {
+      // If IPC fails, allow scan (graceful degradation)
+    }
+  }
+
   store.setIsScanning(true);
   store.setScanProgress([]);
   store.setLatestScan(null);
@@ -99,6 +119,16 @@ export async function runScan(): Promise<ScanSession> {
   store.setLatestScan(session);
   store.setIsScanning(false);
   store.setScanProgress([]);
+
+  // Update scan count info after successful scan
+  if (window.electronAPI) {
+    try {
+      const scanInfo = await window.electronAPI.getScanCount();
+      store.setScanCountInfo(scanInfo);
+    } catch {
+      // ignore
+    }
+  }
 
   const history = getScanHistory();
   store.setScanHistory(history);
