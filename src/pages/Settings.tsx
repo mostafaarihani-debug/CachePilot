@@ -19,6 +19,8 @@ import {
   FolderOpen,
   Key,
   Crown,
+  ChevronRight,
+  Sparkles,
 } from 'lucide-react';
 import type { AppSettings, AppInfo, UpdateStatus } from '../types';
 import { useToastStore } from '../store/toastStore';
@@ -37,30 +39,25 @@ const INTERVAL_OPTIONS = [
   { label: 'Once daily', value: 24 * 60 * 60 * 1000 },
 ];
 
-function formatInterval(ms: number): string {
-  if (ms === 0) return 'Off';
-  if (ms <= 60 * 60 * 1000) return `${ms / (60 * 1000)} min`;
-  if (ms < 24 * 60 * 60 * 1000) return `${ms / (60 * 60 * 1000)} hours`;
-  return 'Daily';
-}
-
 function Toggle({
   enabled,
   onToggle,
+  disabled,
 }: {
   enabled: boolean;
   onToggle: () => void;
+  disabled?: boolean;
 }) {
   return (
     <div
-      className={`w-10 h-6 rounded-full cursor-pointer transition-colors ${
-        enabled ? 'bg-primary' : 'bg-surface-3'
-      }`}
-      onClick={onToggle}
+      className={`relative w-11 h-6 rounded-full cursor-pointer transition-all duration-200 ${
+        enabled ? 'bg-primary shadow-[0_0_12px_rgba(77,163,255,0.3)]' : 'bg-surface-3'
+      } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+      onClick={disabled ? undefined : onToggle}
     >
       <div
-        className={`w-4 h-4 bg-white rounded-full transition-transform mt-1 ${
-          enabled ? 'translate-x-5' : 'translate-x-1'
+        className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-all duration-200 shadow-sm ${
+          enabled ? 'translate-x-[22px]' : 'translate-x-0.5'
         }`}
       />
     </div>
@@ -187,107 +184,241 @@ export function Settings() {
   const isUpdating = updateStatus.status === 'checking';
 
   return (
-    <div className="flex-1 p-8 overflow-auto">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-txt tracking-tight">Settings</h1>
-          <p className="text-txt-secondary mt-1">Configure scan behavior and preferences</p>
-        </div>
-
-        {/* Scan Behavior */}
-        <div className="card">
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Bell className="w-5 h-5 text-primary" />
+    <div className="flex-1 overflow-auto" style={{ background: 'rgb(15, 17, 21)' }}>
+      {/* Header */}
+      <div
+        style={{
+          background: 'linear-gradient(180deg, rgba(77, 163, 255, 0.06) 0%, transparent 100%)',
+          borderBottom: '1px solid rgba(43, 52, 65, 0.5)',
+        }}
+      >
+        <div className="max-w-5xl mx-auto px-8 py-6">
+          <div className="flex items-center gap-3">
+            <div
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 12,
+                background: 'linear-gradient(135deg, rgba(77, 163, 255, 0.15), rgba(77, 163, 255, 0.05))',
+                border: '1px solid rgba(77, 163, 255, 0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <SettingsIcon className="w-5 h-5" style={{ color: 'rgb(77, 163, 255)' }} />
             </div>
-            <div className="flex-1">
-              <h3 className="text-base font-semibold text-txt mb-1">Scan Behavior</h3>
-              <p className="text-sm text-txt-secondary mb-4">
-                Control how CachePilot scans your PC
-              </p>
+            <div>
+              <h1 style={{ fontSize: 22, fontWeight: 700, color: 'rgb(232, 237, 245)' }}>Settings</h1>
+              <p style={{ fontSize: 13, color: 'rgb(116, 130, 148)', marginTop: 2 }}>Configure scan behavior and preferences</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-              <div className="space-y-4">
-                <label className="flex items-center justify-between p-3 rounded-lg bg-surface">
-                  <div className="flex items-center gap-3">
-                    <Power className="w-4 h-4 text-txt-muted" />
+      {/* Content */}
+      <div className="max-w-5xl mx-auto px-8 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Main Settings */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Scan Behavior */}
+            <div
+              style={{
+                borderRadius: 16,
+                border: '1px solid rgb(43, 52, 65)',
+                background: 'linear-gradient(135deg, rgb(21, 26, 33) 0%, rgb(18, 22, 28) 100%)',
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  padding: '20px 24px',
+                  borderBottom: '1px solid rgb(43, 52, 65)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                }}
+              >
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    background: 'rgba(77, 163, 255, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Bell className="w-4.5 h-4.5" style={{ color: 'rgb(77, 163, 255)' }} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: 15, fontWeight: 600, color: 'rgb(232, 237, 245)' }}>Scan Behavior</h3>
+                  <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)' }}>Control how CachePilot scans your PC</p>
+                </div>
+              </div>
+
+              <div style={{ padding: '8px 0' }}>
+                {/* Start with Windows */}
+                <div
+                  style={{
+                    padding: '14px 24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    transition: 'background 0.15s',
+                  }}
+                  className="hover:bg-surface/30"
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255, 167, 38, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Power className="w-4 h-4" style={{ color: 'rgb(255, 167, 38)' }} />
+                    </div>
                     <div>
-                      <span className="text-sm text-txt block">Start with Windows</span>
-                      <span className="text-xs text-txt-muted">Launch CachePilot when you log in</span>
+                      <p style={{ fontSize: 14, color: 'rgb(232, 237, 245)', fontWeight: 500 }}>Start with Windows</p>
+                      <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)', marginTop: 1 }}>Launch CachePilot when you log in</p>
                     </div>
                   </div>
                   <Toggle enabled={settings.autoStart} onToggle={() => update({ autoStart: !settings.autoStart })} />
-                </label>
+                </div>
 
-                <label
-                  className={`flex items-center justify-between p-3 rounded-lg bg-surface ${!userIsPro ? 'opacity-60' : ''}`}
-                  onClick={!userIsPro ? handleProFeatureClick : undefined}
-                >
-                  <div className="flex items-center gap-3">
-                    <Info className="w-4 h-4 text-txt-muted" />
-                    <span className="text-sm text-txt">Auto-scan on startup</span>
-                    {!userIsPro && <ProBadge size="sm" />}
-                  </div>
-                  <Toggle
-                    enabled={settings.autoScanOnStartup}
-                    onToggle={() => userIsPro && update({ autoScanOnStartup: !settings.autoScanOnStartup })}
-                  />
-                </label>
+                <div style={{ height: 1, background: 'rgb(43, 52, 65)', margin: '0 24px' }} />
 
+                {/* Auto-scan on startup */}
                 <div
-                  className={`p-3 rounded-lg bg-surface ${!userIsPro ? 'opacity-60' : ''}`}
+                  style={{
+                    padding: '14px 24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    opacity: userIsPro ? 1 : 0.5,
+                    cursor: userIsPro ? 'default' : 'pointer',
+                  }}
+                  className="hover:bg-surface/30"
                   onClick={!userIsPro ? handleProFeatureClick : undefined}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Clock className="w-4 h-4 text-txt-muted" />
-                      <span className="text-sm text-txt">Background scan interval</span>
-                      {!userIsPro && <ProBadge size="sm" />}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(56, 210, 122, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Zap className="w-4 h-4" style={{ color: 'rgb(56, 210, 122)' }} />
+                    </div>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <p style={{ fontSize: 14, color: 'rgb(232, 237, 245)', fontWeight: 500 }}>Auto-scan on startup</p>
+                        {!userIsPro && <ProBadge size="sm" />}
+                      </div>
+                      <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)', marginTop: 1 }}>Automatically scan when the app launches</p>
+                    </div>
+                  </div>
+                  <Toggle enabled={settings.autoScanOnStartup} onToggle={() => userIsPro && update({ autoScanOnStartup: !settings.autoScanOnStartup })} disabled={!userIsPro} />
+                </div>
+
+                <div style={{ height: 1, background: 'rgb(43, 52, 65)', margin: '0 24px' }} />
+
+                {/* Background scan interval */}
+                <div
+                  style={{
+                    padding: '14px 24px',
+                    opacity: userIsPro ? 1 : 0.5,
+                    cursor: userIsPro ? 'default' : 'pointer',
+                  }}
+                  className="hover:bg-surface/30"
+                  onClick={!userIsPro ? handleProFeatureClick : undefined}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                      <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(168, 130, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Clock className="w-4 h-4" style={{ color: 'rgb(168, 130, 255)' }} />
+                      </div>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <p style={{ fontSize: 14, color: 'rgb(232, 237, 245)', fontWeight: 500 }}>Background scan interval</p>
+                          {!userIsPro && <ProBadge size="sm" />}
+                        </div>
+                        <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)', marginTop: 1 }}>
+                          {settings.autoScanInterval > 0
+                            ? `Scans every ${settings.autoScanInterval >= 3600000 ? `${settings.autoScanInterval / 3600000}h` : `${settings.autoScanInterval / 60000}min`}`
+                            : 'Disabled'}
+                        </p>
+                      </div>
                     </div>
                     <select
                       value={settings.autoScanInterval}
                       onChange={(e) => userIsPro && update({ autoScanInterval: Number(e.target.value) })}
                       disabled={!userIsPro}
-                      className="bg-surface-2 border border-bdr rounded-lg px-3 py-1.5 text-sm text-txt cursor-pointer outline-none focus:border-primary"
+                      style={{
+                        padding: '8px 12px',
+                        borderRadius: 8,
+                        border: '1px solid rgb(43, 52, 65)',
+                        background: 'rgb(15, 17, 21)',
+                        color: 'rgb(232, 237, 245)',
+                        fontSize: 13,
+                        cursor: 'pointer',
+                        outline: 'none',
+                        minWidth: 160,
+                      }}
                     >
                       {INTERVAL_OPTIONS.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
                       ))}
                     </select>
                   </div>
-                  {settings.autoScanInterval > 0 && (
-                    <p className="text-xs text-txt-muted mt-2 ml-7">
-                      CachePilot will scan in the background {formatInterval(settings.autoScanInterval).toLowerCase()} and notify you if significant cache is found.
-                    </p>
-                  )}
                 </div>
 
-                <label className="flex items-center justify-between p-3 rounded-lg bg-surface">
-                  <div className="flex items-center gap-3">
-                    <Bell className="w-4 h-4 text-txt-muted" />
+                <div style={{ height: 1, background: 'rgb(43, 52, 65)', margin: '0 24px' }} />
+
+                {/* Desktop notifications */}
+                <div
+                  style={{
+                    padding: '14px 24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                  className="hover:bg-surface/30"
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(77, 163, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Bell className="w-4 h-4" style={{ color: 'rgb(77, 163, 255)' }} />
+                    </div>
                     <div>
-                      <span className="text-sm text-txt block">Desktop notifications</span>
-                      <span className="text-xs text-txt-muted">Get notified when cache exceeds threshold</span>
+                      <p style={{ fontSize: 14, color: 'rgb(232, 237, 245)', fontWeight: 500 }}>Desktop notifications</p>
+                      <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)', marginTop: 1 }}>Get notified when cache exceeds threshold</p>
                     </div>
                   </div>
-                  <Toggle
-                    enabled={settings.showNotifications}
-                    onToggle={() => update({ showNotifications: !settings.showNotifications })}
-                  />
-                </label>
+                  <Toggle enabled={settings.showNotifications} onToggle={() => update({ showNotifications: !settings.showNotifications })} />
+                </div>
 
                 {settings.showNotifications && (
-                  <div className="p-3 rounded-lg bg-surface">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <HardDrive className="w-4 h-4 text-txt-muted" />
-                        <span className="text-sm text-txt">Notify when cache exceeds</span>
+                  <>
+                    <div style={{ height: 1, background: 'rgb(43, 52, 65)', margin: '0 24px' }} />
+                    <div
+                      style={{
+                        padding: '14px 24px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                      className="hover:bg-surface/30"
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                        <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255, 107, 107, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <HardDrive className="w-4 h-4" style={{ color: 'rgb(255, 107, 107)' }} />
+                        </div>
+                        <p style={{ fontSize: 14, color: 'rgb(232, 237, 245)', fontWeight: 500 }}>Notify when cache exceeds</p>
                       </div>
                       <select
                         value={settings.notificationThresholdMB}
                         onChange={(e) => update({ notificationThresholdMB: Number(e.target.value) })}
-                        className="bg-surface-2 border border-bdr rounded-lg px-3 py-1.5 text-sm text-txt cursor-pointer outline-none focus:border-primary"
+                        style={{
+                          padding: '8px 12px',
+                          borderRadius: 8,
+                          border: '1px solid rgb(43, 52, 65)',
+                          background: 'rgb(15, 17, 21)',
+                          color: 'rgb(232, 237, 245)',
+                          fontSize: 13,
+                          cursor: 'pointer',
+                          outline: 'none',
+                        }}
                       >
                         <option value={50}>50 MB</option>
                         <option value={100}>100 MB</option>
@@ -296,264 +427,379 @@ export function Settings() {
                         <option value={1024}>1 GB</option>
                       </select>
                     </div>
-                  </div>
-                )}
-
-                <label className="flex items-center justify-between p-3 rounded-lg bg-surface">
-                  <div className="flex items-center gap-3">
-                    <Shield className="w-4 h-4 text-txt-muted" />
-                    <span className="text-sm text-txt">Show safety warnings</span>
-                  </div>
-                  <Toggle
-                    enabled={settings.showSafetyWarnings}
-                    onToggle={() => update({ showSafetyWarnings: !settings.showSafetyWarnings })}
-                  />
-                </label>
-
-                <label
-                  className={`flex items-center justify-between p-3 rounded-lg bg-surface ${!userIsPro ? 'opacity-60' : ''}`}
-                  onClick={!userIsPro ? handleProFeatureClick : undefined}
-                >
-                  <div className="flex items-center gap-3">
-                    <Calendar className="w-4 h-4 text-txt-muted" />
-                    <div>
-                      <span className="text-sm text-txt block">Scheduled scan (Windows Task Scheduler)</span>
-                      <span className="text-xs text-txt-muted">Runs scan every hour via Windows Task Scheduler</span>
-                    </div>
-                    {!userIsPro && <ProBadge size="sm" />}
-                  </div>
-                  <Toggle
-                    enabled={isTaskScheduled}
-                    onToggle={() => handleToggleScheduledScan(!isTaskScheduled)}
-                  />
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Updates */}
-        <div className="card">
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Download className="w-5 h-5 text-primary" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-base font-semibold text-txt mb-1">Updates</h3>
-              <p className="text-sm text-txt-secondary mb-4">
-                Keep CachePilot up to date
-              </p>
-
-              <div className="p-3 rounded-lg bg-surface">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <StatusIcon className={`w-4 h-4 text-txt-muted ${isUpdating ? 'animate-spin' : ''}`} />
-                    <div>
-                      <span className="text-sm text-txt block">
-                        {UPDATE_STATUS_LABELS[updateStatus.status]}
-                      </span>
-                      {updateStatus.version && (
-                        <span className="text-xs text-txt-muted">
-                          Version {updateStatus.version}
-                          {updateStatus.releaseDate && ` (${new Date(updateStatus.releaseDate).toLocaleDateString()})`}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    {updateStatus.status === 'idle' && (
-                      <button
-                        onClick={handleCheckUpdate}
-                        className="px-3 py-1.5 text-xs font-medium bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors"
-                      >
-                        Check Now
-                      </button>
-                    )}
-                    {updateStatus.status === 'checking' && (
-                      <span className="px-3 py-1.5 text-xs text-txt-muted">Checking...</span>
-                    )}
-                    {updateStatus.status === 'available' && (
-                      <button
-                        onClick={handleDownloadUpdate}
-                        className="px-3 py-1.5 text-xs font-medium bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
-                      >
-                        Download
-                      </button>
-                    )}
-                    {updateStatus.status === 'downloading' && (
-                      <span className="px-3 py-1.5 text-xs text-txt-muted">
-                        {updateStatus.percent !== undefined ? `${Math.round(updateStatus.percent)}%` : 'Downloading...'}
-                      </span>
-                    )}
-                    {updateStatus.status === 'downloaded' && (
-                      <button
-                        onClick={handleQuitAndInstall}
-                        className="px-3 py-1.5 text-xs font-medium bg-success text-white rounded-lg hover:bg-success/90 transition-colors"
-                      >
-                        Restart & Install
-                      </button>
-                    )}
-                    {updateStatus.status === 'not-available' && (
-                      <button
-                        onClick={handleCheckUpdate}
-                        className="px-3 py-1.5 text-xs font-medium bg-surface-3 text-txt rounded-lg hover:bg-surface-2 transition-colors"
-                      >
-                        Recheck
-                      </button>
-                    )}
-                    {updateStatus.status === 'error' && (
-                      <button
-                        onClick={handleCheckUpdate}
-                        className="px-3 py-1.5 text-xs font-medium bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors"
-                      >
-                        Retry
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {updateStatus.status === 'downloading' && updateStatus.percent !== undefined && (
-                  <div className="w-full bg-surface-3 rounded-full h-1.5 mt-2">
-                    <div
-                      className="bg-primary h-1.5 rounded-full transition-all duration-300"
-                      style={{ width: `${Math.min(updateStatus.percent, 100)}%` }}
-                    />
-                  </div>
-                )}
-
-                {updateStatus.releaseNotes && updateStatus.status !== 'not-available' && (
-                  <div className="mt-3 p-2 rounded bg-surface-2 text-xs text-txt-muted whitespace-pre-wrap max-h-24 overflow-auto">
-                    {updateStatus.releaseNotes.replace(/<[^>]*>/g, '').trim()}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* About */}
-        <div className="card">
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center">
-              <Zap className="w-5 h-5 text-success" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-base font-semibold text-txt mb-1">About CachePilot</h3>
-              <p className="text-sm text-txt-secondary mb-4">
-                App information and system details
-              </p>
-
-              <div className="p-3 rounded-lg bg-surface space-y-3">
-                {appInfo && (
-                  <>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Zap className="w-4 h-4 text-txt-muted" />
-                        <span className="text-sm text-txt">Version</span>
-                      </div>
-                      <span className="text-sm text-txt-muted font-mono">{appInfo.version}</span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Cpu className="w-4 h-4 text-txt-muted" />
-                        <span className="text-sm text-txt">Platform</span>
-                      </div>
-                      <span className="text-sm text-txt-muted capitalize">{appInfo.platform} ({appInfo.arch})</span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Globe className="w-4 h-4 text-txt-muted" />
-                        <span className="text-sm text-txt">Electron</span>
-                      </div>
-                      <span className="text-sm text-txt-muted font-mono">{appInfo.electronVersion}</span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Globe className="w-4 h-4 text-txt-muted" />
-                        <span className="text-sm text-txt">Chrome</span>
-                      </div>
-                      <span className="text-sm text-txt-muted font-mono">{appInfo.chromeVersion}</span>
-                    </div>
                   </>
                 )}
 
-                <div className="pt-2 border-t border-bdr">
-                  <p className="text-xs text-txt-muted">
-                    CachePilot stores all data locally on your PC. Nothing is sent to the internet.
-                  </p>
+                <div style={{ height: 1, background: 'rgb(43, 52, 65)', margin: '0 24px' }} />
+
+                {/* Show safety warnings */}
+                <div
+                  style={{
+                    padding: '14px 24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                  className="hover:bg-surface/30"
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255, 167, 38, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Shield className="w-4 h-4" style={{ color: 'rgb(255, 167, 38)' }} />
+                    </div>
+                    <div>
+                      <p style={{ fontSize: 14, color: 'rgb(232, 237, 245)', fontWeight: 500 }}>Show safety warnings</p>
+                      <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)', marginTop: 1 }}>Confirm before cleaning risky categories</p>
+                    </div>
+                  </div>
+                  <Toggle enabled={settings.showSafetyWarnings} onToggle={() => update({ showSafetyWarnings: !settings.showSafetyWarnings })} />
+                </div>
+
+                <div style={{ height: 1, background: 'rgb(43, 52, 65)', margin: '0 24px' }} />
+
+                {/* Scheduled scan */}
+                <div
+                  style={{
+                    padding: '14px 24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    opacity: userIsPro ? 1 : 0.5,
+                    cursor: userIsPro ? 'default' : 'pointer',
+                  }}
+                  className="hover:bg-surface/30"
+                  onClick={!userIsPro ? handleProFeatureClick : undefined}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(77, 163, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Calendar className="w-4 h-4" style={{ color: 'rgb(77, 163, 255)' }} />
+                    </div>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <p style={{ fontSize: 14, color: 'rgb(232, 237, 245)', fontWeight: 500 }}>Scheduled scan</p>
+                        {!userIsPro && <ProBadge size="sm" />}
+                      </div>
+                      <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)', marginTop: 1 }}>
+                        {isTaskScheduled ? 'Active — runs every hour via Windows Task Scheduler' : 'Runs scan automatically via Windows Task Scheduler'}
+                      </p>
+                    </div>
+                  </div>
+                  <Toggle enabled={isTaskScheduled} onToggle={() => handleToggleScheduledScan(!isTaskScheduled)} disabled={!userIsPro} />
+                </div>
+              </div>
+            </div>
+
+            {/* Updates */}
+            <div
+              style={{
+                borderRadius: 16,
+                border: '1px solid rgb(43, 52, 65)',
+                background: 'linear-gradient(135deg, rgb(21, 26, 33) 0%, rgb(18, 22, 28) 100%)',
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  padding: '20px 24px',
+                  borderBottom: '1px solid rgb(43, 52, 65)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                }}
+              >
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    background: 'rgba(56, 210, 122, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Download className="w-4.5 h-4.5" style={{ color: 'rgb(56, 210, 122)' }} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: 15, fontWeight: 600, color: 'rgb(232, 237, 245)' }}>Updates</h3>
+                  <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)' }}>Keep CachePilot up to date</p>
+                </div>
+              </div>
+
+              <div style={{ padding: '20px 24px' }}>
+                <div
+                  style={{
+                    padding: '16px',
+                    borderRadius: 12,
+                    background: 'rgb(15, 17, 21)',
+                    border: '1px solid rgb(43, 52, 65)',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: updateStatus.status === 'downloading' ? 16 : 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(77, 163, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <StatusIcon className={`w-4 h-4 ${isUpdating ? 'animate-spin' : ''}`} style={{ color: 'rgb(77, 163, 255)' }} />
+                      </div>
+                      <div>
+                        <p style={{ fontSize: 14, fontWeight: 500, color: 'rgb(232, 237, 245)' }}>
+                          {UPDATE_STATUS_LABELS[updateStatus.status]}
+                        </p>
+                        {updateStatus.version && (
+                          <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)', marginTop: 2 }}>
+                            Version {updateStatus.version}
+                            {updateStatus.releaseDate && ` • ${new Date(updateStatus.releaseDate).toLocaleDateString()}`}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      {updateStatus.status === 'idle' && (
+                        <button
+                          onClick={handleCheckUpdate}
+                          style={{
+                            padding: '8px 16px',
+                            borderRadius: 8,
+                            border: 'none',
+                            background: 'rgba(77, 163, 255, 0.15)',
+                            color: 'rgb(77, 163, 255)',
+                            fontSize: 13,
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Check Now
+                        </button>
+                      )}
+                      {updateStatus.status === 'checking' && (
+                        <span style={{ fontSize: 13, color: 'rgb(116, 130, 148)' }}>Checking...</span>
+                      )}
+                      {updateStatus.status === 'available' && (
+                        <button
+                          onClick={handleDownloadUpdate}
+                          style={{
+                            padding: '8px 16px',
+                            borderRadius: 8,
+                            border: 'none',
+                            background: 'rgb(77, 163, 255)',
+                            color: 'white',
+                            fontSize: 13,
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Download
+                        </button>
+                      )}
+                      {updateStatus.status === 'downloading' && (
+                        <span style={{ fontSize: 13, color: 'rgb(116, 130, 148)', fontWeight: 500 }}>
+                          {updateStatus.percent !== undefined ? `${Math.round(updateStatus.percent)}%` : '...'}
+                        </span>
+                      )}
+                      {updateStatus.status === 'downloaded' && (
+                        <button
+                          onClick={handleQuitAndInstall}
+                          style={{
+                            padding: '8px 16px',
+                            borderRadius: 8,
+                            border: 'none',
+                            background: 'rgb(56, 210, 122)',
+                            color: 'white',
+                            fontSize: 13,
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Restart & Install
+                        </button>
+                      )}
+                      {updateStatus.status === 'not-available' && (
+                        <button
+                          onClick={handleCheckUpdate}
+                          style={{
+                            padding: '8px 16px',
+                            borderRadius: 8,
+                            border: '1px solid rgb(43, 52, 65)',
+                            background: 'transparent',
+                            color: 'rgb(168, 179, 194)',
+                            fontSize: 13,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Recheck
+                        </button>
+                      )}
+                      {updateStatus.status === 'error' && (
+                        <button
+                          onClick={handleCheckUpdate}
+                          style={{
+                            padding: '8px 16px',
+                            borderRadius: 8,
+                            border: 'none',
+                            background: 'rgba(255, 107, 107, 0.15)',
+                            color: 'rgb(255, 107, 107)',
+                            fontSize: 13,
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Retry
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {updateStatus.status === 'downloading' && updateStatus.percent !== undefined && (
+                    <div style={{ width: '100%', height: 6, borderRadius: 3, background: 'rgb(43, 52, 65)', overflow: 'hidden' }}>
+                      <div
+                        style={{
+                          height: '100%',
+                          borderRadius: 3,
+                          background: 'linear-gradient(90deg, rgb(77, 163, 255), rgb(168, 130, 255))',
+                          transition: 'width 0.3s ease',
+                          width: `${Math.min(updateStatus.percent, 100)}%`,
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {updateStatus.releaseNotes && !['not-available', 'idle'].includes(updateStatus.status) && (
+                    <div
+                      style={{
+                        marginTop: 12,
+                        padding: 12,
+                        borderRadius: 8,
+                        background: 'rgb(21, 26, 33)',
+                        border: '1px solid rgb(43, 52, 65)',
+                        fontSize: 12,
+                        color: 'rgb(116, 130, 148)',
+                        lineHeight: 1.6,
+                        maxHeight: 80,
+                        overflow: 'auto',
+                        whiteSpace: 'pre-wrap',
+                      }}
+                    >
+                      {updateStatus.releaseNotes.replace(/<[^>]*>/g, '').trim()}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* License */}
-        <div className="card">
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Crown className="w-5 h-5 text-primary" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-base font-semibold text-txt mb-1">License</h3>
-              <p className="text-sm text-txt-secondary mb-4">
-                Manage your CachePilot license
-              </p>
+          {/* Right Column - Info Cards */}
+          <div className="space-y-6">
+            {/* License Card */}
+            <div
+              style={{
+                borderRadius: 16,
+                border: '1px solid rgb(43, 52, 65)',
+                background: 'linear-gradient(135deg, rgb(21, 26, 33) 0%, rgb(18, 22, 28) 100%)',
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  padding: '20px 24px',
+                  borderBottom: '1px solid rgb(43, 52, 65)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                }}
+              >
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    background: userIsPro ? 'rgba(56, 210, 122, 0.1)' : 'rgba(168, 130, 255, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Crown className="w-4.5 h-4.5" style={{ color: userIsPro ? 'rgb(56, 210, 122)' : 'rgb(168, 130, 255)' }} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: 15, fontWeight: 600, color: 'rgb(232, 237, 245)' }}>License</h3>
+                  <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)' }}>Manage your plan</p>
+                </div>
+              </div>
 
-              <div className="p-3 rounded-lg bg-surface">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <Key className="w-4 h-4 text-txt-muted" />
-                    <div>
-                      <span className="text-sm text-txt block">
+              <div style={{ padding: '20px 24px' }}>
+                <div
+                  style={{
+                    padding: 16,
+                    borderRadius: 12,
+                    background: userIsPro
+                      ? 'linear-gradient(135deg, rgba(56, 210, 122, 0.08), rgba(56, 210, 122, 0.02))'
+                      : 'linear-gradient(135deg, rgba(168, 130, 255, 0.08), rgba(168, 130, 255, 0.02))',
+                    border: userIsPro
+                      ? '1px solid rgba(56, 210, 122, 0.2)'
+                      : '1px solid rgba(168, 130, 255, 0.2)',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <Sparkles className="w-4 h-4" style={{ color: userIsPro ? 'rgb(56, 210, 122)' : 'rgb(168, 130, 255)' }} />
+                      <span style={{ fontSize: 14, fontWeight: 600, color: 'rgb(232, 237, 245)' }}>
                         {userIsPro ? 'CachePilot Pro' : 'CachePilot Free'}
                       </span>
-                      {userIsPro && licenseStatus?.licenseKey && (
-                        <span className="text-xs text-txt-muted font-mono">
-                          {licenseStatus.licenseKey.slice(0, 8)}...
-                        </span>
-                      )}
-                      {!userIsPro && (
-                        <span className="text-xs text-txt-muted">3 scans per day</span>
-                      )}
                     </div>
-                  </div>
-                  {userIsPro ? (
                     <span
                       style={{
-                        padding: '4px 10px',
-                        borderRadius: 8,
-                        background: 'rgba(56, 210, 122, 0.1)',
-                        border: '1px solid rgba(56, 210, 122, 0.25)',
+                        padding: '3px 8px',
+                        borderRadius: 6,
+                        background: userIsPro ? 'rgba(56, 210, 122, 0.15)' : 'rgba(116, 130, 148, 0.15)',
+                        color: userIsPro ? 'rgb(56, 210, 122)' : 'rgb(116, 130, 148)',
                         fontSize: 11,
                         fontWeight: 600,
-                        color: 'rgb(56, 210, 122)',
                       }}
                     >
-                      Active
+                      {userIsPro ? 'ACTIVE' : 'FREE'}
                     </span>
-                  ) : (
+                  </div>
+
+                  {userIsPro && licenseStatus?.licenseKey && (
+                    <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)', fontFamily: 'monospace', marginBottom: 8 }}>
+                      Key: {licenseStatus.licenseKey.slice(0, 8)}...
+                    </p>
+                  )}
+
+                  {!userIsPro && (
+                    <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)', marginBottom: 12 }}>
+                      3 scans per day • Basic features
+                    </p>
+                  )}
+
+                  {userIsPro && licenseStatus?.expiresAt && (
+                    <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)', marginBottom: 12 }}>
+                      Expires: {new Date(licenseStatus.expiresAt).toLocaleDateString()}
+                    </p>
+                  )}
+
+                  {!userIsPro ? (
                     <button
                       onClick={() => window.electronAPI?.openExternal('https://cachepilot.gumroad.com/l/cache-pilot')}
-                      className="px-3 py-1.5 text-xs font-medium bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors"
+                      style={{
+                        width: '100%',
+                        padding: '10px 16px',
+                        borderRadius: 8,
+                        border: 'none',
+                        background: 'linear-gradient(135deg, rgb(77, 163, 255), rgb(168, 130, 255))',
+                        color: 'white',
+                        fontSize: 13,
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 8,
+                      }}
                     >
-                      Upgrade
+                      Upgrade to Pro
+                      <ChevronRight className="w-4 h-4" />
                     </button>
-                  )}
-                </div>
-
-                {userIsPro && licenseStatus?.expiresAt && (
-                  <div className="flex items-center justify-between text-xs text-txt-muted pt-2 border-t border-bdr">
-                    <span>Expires</span>
-                    <span>{new Date(licenseStatus.expiresAt).toLocaleDateString()}</span>
-                  </div>
-                )}
-
-                {userIsPro && (
-                  <div className="pt-2 mt-2 border-t border-bdr">
+                  ) : (
                     <button
                       onClick={async () => {
                         if (window.electronAPI) {
@@ -568,66 +814,175 @@ export function Settings() {
                           }
                         }
                       }}
-                      className="text-xs text-red-400 hover:text-red-300 transition-colors"
+                      style={{
+                        width: '100%',
+                        padding: '8px 16px',
+                        borderRadius: 8,
+                        border: '1px solid rgba(255, 107, 107, 0.3)',
+                        background: 'transparent',
+                        color: 'rgb(255, 107, 107)',
+                        fontSize: 12,
+                        cursor: 'pointer',
+                      }}
                     >
-                      Deactivate license
+                      Deactivate License
                     </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* About Card */}
+            <div
+              style={{
+                borderRadius: 16,
+                border: '1px solid rgb(43, 52, 65)',
+                background: 'linear-gradient(135deg, rgb(21, 26, 33) 0%, rgb(18, 22, 28) 100%)',
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  padding: '20px 24px',
+                  borderBottom: '1px solid rgb(43, 52, 65)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                }}
+              >
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    background: 'rgba(77, 163, 255, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Info className="w-4.5 h-4.5" style={{ color: 'rgb(77, 163, 255)' }} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: 15, fontWeight: 600, color: 'rgb(232, 237, 245)' }}>About</h3>
+                  <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)' }}>App information</p>
+                </div>
+              </div>
+
+              <div style={{ padding: '16px 24px' }}>
+                {appInfo && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {[
+                      { icon: Zap, label: 'Version', value: appInfo.version, color: 'rgb(56, 210, 122)' },
+                      { icon: Cpu, label: 'Platform', value: `${appInfo.platform} (${appInfo.arch})`, color: 'rgb(168, 130, 255)' },
+                      { icon: Globe, label: 'Electron', value: appInfo.electronVersion, color: 'rgb(77, 163, 255)' },
+                      { icon: Globe, label: 'Chrome', value: appInfo.chromeVersion, color: 'rgb(255, 167, 38)' },
+                    ].map((item) => (
+                      <div key={item.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <item.icon className="w-3.5 h-3.5" style={{ color: item.color }} />
+                          <span style={{ fontSize: 13, color: 'rgb(168, 179, 194)' }}>{item.label}</span>
+                        </div>
+                        <span style={{ fontSize: 13, color: 'rgb(116, 130, 148)', fontFamily: 'monospace' }}>{item.value}</span>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Logs */}
-        <div className="card">
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-lg bg-surface-3 flex items-center justify-center">
-              <FolderOpen className="w-5 h-5 text-txt-secondary" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-base font-semibold text-txt mb-1">Logs</h3>
-              <p className="text-sm text-txt-secondary mb-4">
-                View application logs for troubleshooting
-              </p>
-
-              <div className="p-3 rounded-lg bg-surface">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <FolderOpen className="w-4 h-4 text-txt-muted" />
-                    <div>
-                      <span className="text-sm text-txt block">Application logs</span>
-                      <span className="text-xs text-txt-muted">View scan and error logs stored on your PC</span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => window.electronAPI?.openLogsFolder()}
-                    className="px-3 py-1.5 text-xs font-medium bg-surface-3 text-txt rounded-lg hover:bg-surface-2 transition-colors"
-                  >
-                    Open Logs Folder
-                  </button>
+            {/* Quick Actions */}
+            <div
+              style={{
+                borderRadius: 16,
+                border: '1px solid rgb(43, 52, 65)',
+                background: 'linear-gradient(135deg, rgb(21, 26, 33) 0%, rgb(18, 22, 28) 100%)',
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  padding: '20px 24px',
+                  borderBottom: '1px solid rgb(43, 52, 65)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                }}
+              >
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    background: 'rgba(255, 167, 38, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <FolderOpen className="w-4.5 h-4.5" style={{ color: 'rgb(255, 167, 38)' }} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: 15, fontWeight: 600, color: 'rgb(232, 237, 245)' }}>Quick Actions</h3>
+                  <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)' }}>Troubleshooting</p>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Data & Privacy */}
-        <div className="card">
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center">
-              <SettingsIcon className="w-5 h-5 text-success" />
+              <div style={{ padding: '12px 24px' }}>
+                <button
+                  onClick={() => window.electronAPI?.openLogsFolder()}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    borderRadius: 10,
+                    border: '1px solid rgb(43, 52, 65)',
+                    background: 'rgb(15, 17, 21)',
+                    color: 'rgb(232, 237, 245)',
+                    fontSize: 13,
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    transition: 'all 0.15s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = 'rgb(77, 163, 255)';
+                    e.currentTarget.style.background = 'rgba(77, 163, 255, 0.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'rgb(43, 52, 65)';
+                    e.currentTarget.style.background = 'rgb(15, 17, 21)';
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <FolderOpen className="w-4 h-4" style={{ color: 'rgb(116, 130, 148)' }} />
+                    <span>Open Logs Folder</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4" style={{ color: 'rgb(116, 130, 148)' }} />
+                </button>
+              </div>
             </div>
-            <div className="flex-1">
-              <h3 className="text-base font-semibold text-txt mb-1">Data & Privacy</h3>
-              <p className="text-sm text-txt-secondary mb-4">
-                All data stays on your device
-              </p>
 
-              <div className="p-3 rounded-lg bg-success/10 border border-success/20">
-                <p className="text-sm text-success">
-                  CachePilot stores all scan data locally on your PC. Nothing is sent to the internet.
-                </p>
+            {/* Privacy Notice */}
+            <div
+              style={{
+                borderRadius: 16,
+                border: '1px solid rgba(56, 210, 122, 0.2)',
+                background: 'linear-gradient(135deg, rgba(56, 210, 122, 0.05), rgba(56, 210, 122, 0.02))',
+                padding: '16px 20px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                <Shield className="w-4 h-4 mt-0.5" style={{ color: 'rgb(56, 210, 122)', flexShrink: 0 }} />
+                <div>
+                  <p style={{ fontSize: 13, fontWeight: 500, color: 'rgb(56, 210, 122)', marginBottom: 4 }}>
+                    Local & Private
+                  </p>
+                  <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)', lineHeight: 1.5 }}>
+                    All scan data stays on your PC. Nothing is sent to the internet.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
