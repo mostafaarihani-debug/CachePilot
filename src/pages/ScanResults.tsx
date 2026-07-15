@@ -9,6 +9,7 @@ import {
 import { updateScanSession, getScanHistory } from '../db/queries';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { CleanupResults } from '../components/CleanupResults';
+import { ScanProgress } from '../components/ScanProgress';
 import { CategoryIcon } from '../components/CategoryIcon';
 import {
   Search,
@@ -21,6 +22,7 @@ import {
   Shield,
   FileText,
   ScanSearch,
+  Trash2,
 } from 'lucide-react';
 
 export function ScanResults() {
@@ -81,7 +83,7 @@ export function ScanResults() {
   const handleScan = async () => {
     setCleanupReport(null);
     const scan = await runScan();
-    if (!scan) return; // Scan limit reached
+    if (!scan) return;
     const safeIds = scan.categories
       .filter((c) => c.safetyLevel === 'safe' && c.itemCount > 0)
       .map((c) => c.categoryId);
@@ -144,9 +146,7 @@ export function ScanResults() {
         itemCount: updatedItemCount,
       });
 
-      // Refresh history
       useAppStore.getState().setScanHistory(getScanHistory());
-
       setSelectedCategories(new Set());
     } catch {
       // errors handled in runCleanup
@@ -160,7 +160,7 @@ export function ScanResults() {
 
   if (cleanupReport) {
     return (
-      <div className="flex-1 p-8 overflow-auto">
+      <div className="flex-1 p-8 overflow-auto" style={{ background: 'rgb(15, 17, 21)' }}>
         <div className="max-w-4xl mx-auto">
           <CleanupResults
             report={cleanupReport}
@@ -183,6 +183,9 @@ export function ScanResults() {
     : hasCaution
     ? 'Some selected categories may sign you out of websites or reset preferences. Please review the warnings below.'
     : 'This will clean safe cache categories. You can safely proceed.';
+
+  const categoriesWithItems = latestScan?.categories.filter(c => c.itemCount > 0) ?? [];
+  const categoriesEmpty = latestScan?.categories.filter(c => c.itemCount === 0) ?? [];
 
   return (
     <div className="flex-1 overflow-auto" style={{ background: 'rgb(15, 17, 21)' }}>
@@ -214,7 +217,7 @@ export function ScanResults() {
                 <h1 style={{ fontSize: 22, fontWeight: 700, color: 'rgb(232, 237, 245)' }}>Scan Results</h1>
                 <p style={{ fontSize: 13, color: 'rgb(116, 130, 148)', marginTop: 2 }}>
                   {latestScan
-                    ? `Found ${formatSize(latestScan.totalSize)} across ${latestScan.categories.length} categories`
+                    ? `Found ${formatSize(latestScan.totalSize)} across ${categoriesWithItems.length} categories`
                     : 'Run a scan to see what can be cleaned'}
                 </p>
               </div>
@@ -257,18 +260,42 @@ export function ScanResults() {
       {/* Content */}
       <div className="max-w-5xl mx-auto px-8 py-6 space-y-6">
 
+        {/* Clean Selected Bar */}
         {latestScan && selectedCategories.size > 0 && (
-          <div className="card-elevated flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-primary" />
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '16px 20px',
+              borderRadius: 14,
+              background: 'linear-gradient(135deg, rgba(56, 210, 122, 0.08), rgba(77, 163, 255, 0.05))',
+              border: '1px solid rgba(56, 210, 122, 0.2)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 12,
+                  background: 'rgba(56, 210, 122, 0.12)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Sparkles style={{ width: 22, height: 22, color: 'rgb(56, 210, 122)' }} />
               </div>
               <div>
-                <p className="text-sm text-txt-secondary">
-                  {selectedCategories.size} categories selected
+                <p style={{ fontSize: 13, color: 'rgb(130, 140, 155)', margin: 0 }}>
+                  {selectedCategories.size} {selectedCategories.size === 1 ? 'category' : 'categories'} selected
                 </p>
-                <p className="text-lg font-semibold text-txt">
-                  {formatSize(totalSelectedSize)} to clean ({totalSelectedItems} items)
+                <p style={{ fontSize: 18, fontWeight: 700, color: 'rgb(232, 237, 245)', margin: 0, marginTop: 2 }}>
+                  {formatSize(totalSelectedSize)} to clean
+                  <span style={{ fontSize: 14, fontWeight: 400, color: 'rgb(130, 140, 155)', marginLeft: 8 }}>
+                    ({totalSelectedItems.toLocaleString()} items)
+                  </span>
                 </p>
               </div>
             </div>
@@ -276,10 +303,10 @@ export function ScanResults() {
               onClick={handleCleanClick}
               disabled={isCleaning}
               style={{
-                padding: '10px 24px',
-                borderRadius: 10,
+                padding: '12px 28px',
+                borderRadius: 12,
                 border: 'none',
-                background: isCleaning ? 'rgba(56, 210, 122, 0.15)' : 'linear-gradient(135deg, rgb(56, 210, 122), rgb(77, 163, 255))',
+                background: isCleaning ? 'rgba(56, 210, 122, 0.15)' : 'linear-gradient(135deg, rgb(56, 210, 122), rgb(45, 180, 140))',
                 color: 'white',
                 fontSize: 14,
                 fontWeight: 600,
@@ -287,7 +314,7 @@ export function ScanResults() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 8,
-                boxShadow: isCleaning ? 'none' : '0 0 20px rgba(56, 210, 122, 0.3)',
+                boxShadow: isCleaning ? 'none' : '0 4px 20px rgba(56, 210, 122, 0.3)',
                 transition: 'all 0.2s',
               }}
             >
@@ -298,7 +325,7 @@ export function ScanResults() {
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="w-4 h-4" />
+                  <Trash2 style={{ width: 16, height: 16 }} />
                   Clean Selected
                 </>
               )}
@@ -308,239 +335,352 @@ export function ScanResults() {
 
         {latestScan ? (
           <div>
+            {/* Select All */}
             <div
               onClick={toggleSelectAll}
-              className="flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors hover:bg-surface mb-3"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 16px',
+                borderRadius: 12,
+                cursor: 'pointer',
+                transition: 'background 0.15s',
+                marginBottom: 8,
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(43, 52, 65, 0.3)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              <div className="flex items-center gap-3">
-                <div className={`checkbox ${allSelected ? 'checked' : ''}`} />
-                <span className="text-sm font-medium text-txt">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div
+                  style={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: 6,
+                    border: `2px solid ${allSelected ? 'rgb(56, 210, 122)' : 'rgb(77, 132, 168)'}`,
+                    background: allSelected ? 'rgb(56, 210, 122)' : 'transparent',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  {allSelected && <CheckCircle2 style={{ width: 14, height: 14, color: 'white' }} />}
+                </div>
+                <span style={{ fontSize: 14, fontWeight: 500, color: 'rgb(232, 237, 245)' }}>
                   {allSelected ? 'Deselect All' : 'Select All'}
                 </span>
               </div>
-              <span className="text-sm text-txt-muted">
+              <span style={{ fontSize: 13, color: 'rgb(116, 130, 148)' }}>
                 {someSelected
                   ? `${selectableCategoryIds.filter(id => selectedCategories.has(id)).length} of ${selectableCategoryIds.length} selected`
                   : `${selectableCategoryIds.length} of ${allCategoryIds.length} categories with data`}
               </span>
             </div>
 
-            <div className="space-y-3">
-            {latestScan.categories.map((cat) => {
-              const category = getCategoryById(cat.categoryId);
-              const isExpanded = expandedCategory === cat.categoryId;
-              const isSelected = selectedCategories.has(cat.categoryId);
+            {/* Categories with data */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {categoriesWithItems.map((cat) => {
+                const category = getCategoryById(cat.categoryId);
+                const isExpanded = expandedCategory === cat.categoryId;
+                const isSelected = selectedCategories.has(cat.categoryId);
 
-              return (
-                <div
-                  key={cat.categoryId}
-                  className={`card transition-all duration-200 ${
-                    isSelected ? 'border-primary/50 bg-primary/5' : ''
-                  }`}
-                  style={{
-                    opacity: cat.itemCount === 0 ? 0.45 : 1,
-                  }}
-                >
-                  <div className="flex items-center gap-4">
-                    <button
-                      onClick={() => toggleCategory(cat.categoryId)}
-                      className={`checkbox ${isSelected ? 'checked' : ''}`}
+                return (
+                  <div
+                    key={cat.categoryId}
+                    style={{
+                      borderRadius: 14,
+                      background: isSelected ? 'rgba(56, 210, 122, 0.04)' : 'rgb(21, 26, 33)',
+                      border: `1px solid ${isSelected ? 'rgba(56, 210, 122, 0.25)' : 'rgb(43, 52, 65)'}`,
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    {/* Category Header */}
+                    <div
                       style={{
-                        opacity: cat.itemCount === 0 ? 0.3 : 1,
-                        cursor: cat.itemCount === 0 ? 'not-allowed' : 'pointer',
-                        pointerEvents: cat.itemCount === 0 ? 'none' : 'auto',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 14,
+                        padding: '14px 18px',
                       }}
-                    />
+                    >
+                      {/* Checkbox */}
+                      <button
+                        onClick={() => toggleCategory(cat.categoryId)}
+                        style={{
+                          width: 22,
+                          height: 22,
+                          borderRadius: 7,
+                          border: `2px solid ${isSelected ? 'rgb(56, 210, 122)' : 'rgb(77, 132, 168)'}`,
+                          background: isSelected ? 'rgb(56, 210, 122)' : 'transparent',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s',
+                          flexShrink: 0,
+                          padding: 0,
+                        }}
+                      >
+                        {isSelected && <CheckCircle2 style={{ width: 14, height: 14, color: 'white' }} />}
+                      </button>
 
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <CategoryIcon
-                            iconName={category?.icon || 'Globe'}
-                            size={18}
-                            color={cat.safetyLevel === 'safe' ? '#38D27A' : cat.safetyLevel === 'caution' ? '#F5B84A' : '#FF6B6B'}
-                          />
-                          <h3 className="text-base font-semibold text-txt">{cat.name}</h3>
+                      {/* Icon */}
+                      <div
+                        style={{
+                          width: 36,
+                          height: 36,
+                          borderRadius: 10,
+                          background: cat.safetyLevel === 'safe'
+                            ? 'rgba(56, 210, 122, 0.1)'
+                            : cat.safetyLevel === 'caution'
+                            ? 'rgba(245, 184, 74, 0.1)'
+                            : 'rgba(255, 107, 107, 0.1)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                        }}
+                      >
+                        <CategoryIcon
+                          iconName={category?.icon || 'Globe'}
+                          size={18}
+                          color={cat.safetyLevel === 'safe' ? '#38D27A' : cat.safetyLevel === 'caution' ? '#F5B84A' : '#FF6B6B'}
+                        />
+                      </div>
+
+                      {/* Name + Badge */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontSize: 15, fontWeight: 600, color: 'rgb(232, 237, 245)' }}>
+                            {cat.name}
+                          </span>
                           <span
-                            className={`badge ${
-                              cat.safetyLevel === 'safe'
-                                ? 'badge-safe'
+                            style={{
+                              fontSize: 11,
+                              fontWeight: 600,
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.04em',
+                              padding: '2px 8px',
+                              borderRadius: 6,
+                              background: cat.safetyLevel === 'safe'
+                                ? 'rgba(56, 210, 122, 0.12)'
                                 : cat.safetyLevel === 'caution'
-                                ? 'badge-caution'
-                                : 'badge-risky'
-                            }`}
+                                ? 'rgba(245, 184, 74, 0.12)'
+                                : 'rgba(255, 107, 107, 0.12)',
+                              color: cat.safetyLevel === 'safe'
+                                ? 'rgb(56, 210, 122)'
+                                : cat.safetyLevel === 'caution'
+                                ? 'rgb(245, 184, 74)'
+                                : 'rgb(255, 107, 107)',
+                            }}
                           >
                             {cat.safetyLevel}
                           </span>
                         </div>
-                        <div className="flex items-center gap-4">
-                          <span className="text-sm text-txt-muted">{cat.itemCount} items</span>
-                          <span className="text-sm font-medium text-txt-secondary">
-                            {formatSize(cat.totalSize)}
-                          </span>
-                          <button
-                            onClick={() => toggleExpand(cat.categoryId)}
-                            className="btn-ghost p-2"
-                          >
-                            {isExpanded ? (
-                              <ChevronUp className="w-4 h-4" />
-                            ) : (
-                              <ChevronDown className="w-4 h-4" />
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {isExpanded && category && (
-                    <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid rgb(43, 52, 65)' }}>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                        <div style={{ padding: '12px 14px', borderRadius: 12, background: 'rgb(26, 32, 40)', border: '1px solid rgb(43, 52, 65)' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                            <Info style={{ width: 14, height: 14, color: '#4DA3FF' }} />
-                            <span style={{ fontSize: 12, fontWeight: 600, color: 'rgb(169, 180, 194)', letterSpacing: '0.02em' }}>What it is</span>
-                          </div>
-                          <p style={{ fontSize: 13, lineHeight: 1.5, color: 'rgb(232, 237, 245)', margin: 0 }}>{category.whatItIs}</p>
-                        </div>
-
-                        <div style={{ padding: '12px 14px', borderRadius: 12, background: 'rgb(26, 32, 40)', border: '1px solid rgb(43, 52, 65)' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                            <Info style={{ width: 14, height: 14, color: '#27D3B5' }} />
-                            <span style={{ fontSize: 12, fontWeight: 600, color: 'rgb(169, 180, 194)', letterSpacing: '0.02em' }}>Why it exists</span>
-                          </div>
-                          <p style={{ fontSize: 13, lineHeight: 1.5, color: 'rgb(232, 237, 245)', margin: 0 }}>{category.whyItExists}</p>
-                        </div>
-
-                        <div style={{ padding: '12px 14px', borderRadius: 12, background: 'rgb(26, 32, 40)', border: '1px solid rgb(43, 52, 65)' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                            <CheckCircle2 style={{ width: 14, height: 14, color: '#38D27A' }} />
-                            <span style={{ fontSize: 12, fontWeight: 600, color: 'rgb(169, 180, 194)', letterSpacing: '0.02em' }}>When to clean</span>
-                          </div>
-                          <p style={{ fontSize: 13, lineHeight: 1.5, color: 'rgb(232, 237, 245)', margin: 0 }}>{category.whenToClean}</p>
-                        </div>
-
-                        <div style={{ padding: '12px 14px', borderRadius: 12, background: 'rgb(26, 32, 40)', border: '1px solid rgb(43, 52, 65)' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                            <AlertTriangle style={{ width: 14, height: 14, color: '#F5B84A' }} />
-                            <span style={{ fontSize: 12, fontWeight: 600, color: 'rgb(169, 180, 194)', letterSpacing: '0.02em' }}>What may change</span>
-                          </div>
-                          <p style={{ fontSize: 13, lineHeight: 1.5, color: 'rgb(232, 237, 245)', margin: 0 }}>{category.whatMayChange}</p>
-                        </div>
                       </div>
 
-                      <div
-                        style={{
-                          marginTop: 12,
-                          padding: '10px 14px',
-                          borderRadius: 12,
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 8,
-                          background: cat.safetyLevel === 'safe'
-                            ? 'rgba(56, 210, 122, 0.08)'
-                            : cat.safetyLevel === 'caution'
-                            ? 'rgba(245, 184, 74, 0.08)'
-                            : 'rgba(255, 107, 107, 0.08)',
-                          border: `1px solid ${
-                            cat.safetyLevel === 'safe'
-                              ? 'rgba(56, 210, 122, 0.2)'
-                              : cat.safetyLevel === 'caution'
-                              ? 'rgba(245, 184, 74, 0.2)'
-                              : 'rgba(255, 107, 107, 0.2)'
-                          }`,
-                        }}
-                      >
-                        <Shield
-                          style={{
-                            width: 16,
-                            height: 16,
-                            color: cat.safetyLevel === 'safe'
-                              ? '#38D27A'
-                              : cat.safetyLevel === 'caution'
-                              ? '#F5B84A'
-                              : '#FF6B6B',
-                            flexShrink: 0,
-                          }}
-                        />
-                        <span style={{ fontSize: 13, fontWeight: 500, color: 'rgb(232, 237, 245)' }}>
-                          {category.safetyNote}
+                      {/* Stats */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0 }}>
+                        <span style={{ fontSize: 13, color: 'rgb(116, 130, 148)' }}>
+                          {cat.itemCount.toLocaleString()} items
                         </span>
+                        <span style={{ fontSize: 14, fontWeight: 600, color: 'rgb(169, 180, 194)', minWidth: 70, textAlign: 'right' }}>
+                          {formatSize(cat.totalSize)}
+                        </span>
+                        <button
+                          onClick={() => toggleExpand(cat.categoryId)}
+                          style={{
+                            width: 28,
+                            height: 28,
+                            borderRadius: 8,
+                            border: 'none',
+                            background: isExpanded ? 'rgba(77, 163, 255, 0.1)' : 'transparent',
+                            color: isExpanded ? 'rgb(77, 163, 255)' : 'rgb(116, 130, 148)',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.15s',
+                          }}
+                        >
+                          {isExpanded ? <ChevronUp style={{ width: 16, height: 16 }} /> : <ChevronDown style={{ width: 16, height: 16 }} />}
+                        </button>
                       </div>
-
-                      {/* File Preview */}
-                      {cat.itemCount > 0 && (
-                        <div style={{ marginTop: 12 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                            <FileText style={{ width: 14, height: 14, color: 'rgb(116, 130, 148)' }} />
-                            <span style={{ fontSize: 12, fontWeight: 600, color: 'rgb(169, 180, 194)', letterSpacing: '0.02em' }}>
-                              Files to be cleaned ({cat.itemCount} items)
-                            </span>
-                          </div>
-                          <div
-                            style={{
-                              maxHeight: 200,
-                              overflowY: 'auto',
-                              borderRadius: 10,
-                              background: 'rgb(22, 27, 34)',
-                              border: '1px solid rgb(43, 52, 65)',
-                            }}
-                          >
-                            {(getScanCacheFiles().get(cat.categoryId) ?? []).slice(0, 50).map((file, i) => (
-                              <div
-                                key={i}
-                                style={{
-                                  padding: '6px 12px',
-                                  borderBottom: i < 49 ? '1px solid rgba(43, 52, 65, 0.5)' : 'none',
-                                  display: 'flex',
-                                  justifyContent: 'space-between',
-                                  alignItems: 'center',
-                                }}
-                              >
-                                <span
-                                  style={{
-                                    fontSize: 12,
-                                    color: 'rgb(169, 180, 194)',
-                                    fontFamily: 'monospace',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap',
-                                    flex: 1,
-                                    marginRight: 12,
-                                  }}
-                                  title={file.path}
-                                >
-                                  {file.path}
-                                </span>
-                                <span style={{ fontSize: 11, color: 'rgb(116, 130, 148)', flexShrink: 0 }}>
-                                  {formatSize(file.size)}
-                                </span>
-                              </div>
-                            ))}
-                            {cat.itemCount > 50 && (
-                              <div style={{ padding: '8px 12px', textAlign: 'center' }}>
-                                <span style={{ fontSize: 12, color: 'rgb(116, 130, 148)' }}>
-                                  +{cat.itemCount - 50} more files
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
                     </div>
-                  )}
+
+                    {/* Expanded Content */}
+                    {isExpanded && category && (
+                      <div style={{ padding: '0 18px 18px', borderTop: '1px solid rgba(43, 52, 65, 0.5)', marginTop: 0, paddingTop: 16 }}>
+                        {/* Info Grid */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
+                          <InfoCard icon={Info} iconColor="#4DA3FF" label="What it is" text={category.whatItIs} />
+                          <InfoCard icon={Info} iconColor="#27D3B5" label="Why it exists" text={category.whyItExists} />
+                          <InfoCard icon={CheckCircle2} iconColor="#38D27A" label="When to clean" text={category.whenToClean} />
+                          <InfoCard icon={AlertTriangle} iconColor="#F5B84A" label="What may change" text={category.whatMayChange} />
+                        </div>
+
+                        {/* Safety Note */}
+                        <div
+                          style={{
+                            padding: '10px 14px',
+                            borderRadius: 10,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 10,
+                            background: cat.safetyLevel === 'safe'
+                              ? 'rgba(56, 210, 122, 0.06)'
+                              : cat.safetyLevel === 'caution'
+                              ? 'rgba(245, 184, 74, 0.06)'
+                              : 'rgba(255, 107, 107, 0.06)',
+                            border: `1px solid ${
+                              cat.safetyLevel === 'safe'
+                                ? 'rgba(56, 210, 122, 0.15)'
+                                : cat.safetyLevel === 'caution'
+                                ? 'rgba(245, 184, 74, 0.15)'
+                                : 'rgba(255, 107, 107, 0.15)'
+                            }`,
+                          }}
+                        >
+                          <Shield
+                            style={{
+                              width: 16,
+                              height: 16,
+                              color: cat.safetyLevel === 'safe'
+                                ? '#38D27A'
+                                : cat.safetyLevel === 'caution'
+                                ? '#F5B84A'
+                                : '#FF6B6B',
+                              flexShrink: 0,
+                            }}
+                          />
+                          <span style={{ fontSize: 13, fontWeight: 500, color: 'rgb(232, 237, 245)' }}>
+                            {category.safetyNote}
+                          </span>
+                        </div>
+
+                        {/* File Preview */}
+                        {cat.itemCount > 0 && (
+                          <div style={{ marginTop: 14 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                              <FileText style={{ width: 14, height: 14, color: 'rgb(116, 130, 148)' }} />
+                              <span style={{ fontSize: 12, fontWeight: 600, color: 'rgb(130, 140, 155)', letterSpacing: '0.02em' }}>
+                                FILES TO BE CLEANED
+                              </span>
+                            </div>
+                            <div
+                              style={{
+                                maxHeight: 180,
+                                overflowY: 'auto',
+                                borderRadius: 10,
+                                background: 'rgb(15, 17, 21)',
+                                border: '1px solid rgb(43, 52, 65)',
+                              }}
+                            >
+                              {(getScanCacheFiles().get(cat.categoryId) ?? []).slice(0, 50).map((file, i) => (
+                                <div
+                                  key={i}
+                                  style={{
+                                    padding: '7px 12px',
+                                    borderBottom: i < 49 ? '1px solid rgba(43, 52, 65, 0.4)' : 'none',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                  }}
+                                >
+                                  <span
+                                    style={{
+                                      fontSize: 12,
+                                      color: 'rgb(169, 180, 194)',
+                                      fontFamily: "'JetBrains Mono', monospace",
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      whiteSpace: 'nowrap',
+                                      flex: 1,
+                                      marginRight: 12,
+                                    }}
+                                    title={file.path}
+                                  >
+                                    {file.path}
+                                  </span>
+                                  <span style={{ fontSize: 11, color: 'rgb(116, 130, 148)', flexShrink: 0 }}>
+                                    {formatSize(file.size)}
+                                  </span>
+                                </div>
+                              ))}
+                              {cat.itemCount > 50 && (
+                                <div style={{ padding: '8px 12px', textAlign: 'center', borderTop: '1px solid rgba(43, 52, 65, 0.4)' }}>
+                                  <span style={{ fontSize: 12, color: 'rgb(116, 130, 148)' }}>
+                                    +{cat.itemCount - 50} more files
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Empty categories */}
+            {categoriesEmpty.length > 0 && (
+              <div style={{ marginTop: 20 }}>
+                <p style={{ fontSize: 12, fontWeight: 600, color: 'rgb(90, 100, 120)', letterSpacing: '0.04em', marginBottom: 8, paddingLeft: 4 }}>
+                  EMPTY CATEGORIES
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {categoriesEmpty.map((cat) => (
+                    <div
+                      key={cat.categoryId}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: 8,
+                        background: 'rgb(21, 26, 33)',
+                        border: '1px solid rgb(43, 52, 65)',
+                        fontSize: 12,
+                        color: 'rgb(90, 100, 120)',
+                      }}
+                    >
+                      {cat.name}
+                    </div>
+                  ))}
                 </div>
-              );
-            })}
-            </div>
+              </div>
+            )}
           </div>
+        ) : isScanning ? (
+          <ScanProgress />
         ) : (
-          <div className="card-elevated text-center py-16">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <Search className="w-8 h-8 text-primary" />
+          <div
+            style={{
+              textAlign: 'center',
+              padding: '60px 24px',
+              borderRadius: 16,
+              background: 'rgb(21, 26, 33)',
+              border: '1px solid rgb(43, 52, 65)',
+            }}
+          >
+            <div
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: 16,
+                background: 'rgba(77, 163, 255, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 20px',
+              }}
+            >
+              <Search style={{ width: 28, height: 28, color: 'rgb(77, 163, 255)' }} />
             </div>
-            <h3 className="text-lg font-semibold text-txt mb-2">Ready to scan</h3>
-            <p className="text-txt-secondary max-w-md mx-auto">
+            <h3 style={{ fontSize: 18, fontWeight: 600, color: 'rgb(232, 237, 245)', margin: '0 0 8px' }}>
+              Ready to scan
+            </h3>
+            <p style={{ fontSize: 14, color: 'rgb(116, 130, 148)', maxWidth: 360, margin: '0 auto', lineHeight: 1.6 }}>
               Click the scan button to find cache files on your PC. We will show you exactly what can be cleaned and explain each category.
             </p>
           </div>
@@ -558,6 +698,27 @@ export function ScanResults() {
         onConfirm={handleConfirmClean}
         onCancel={() => setShowConfirm(false)}
       />
+    </div>
+  );
+}
+
+function InfoCard({ icon: Icon, iconColor, label, text }: { icon: any; iconColor: string; label: string; text: string }) {
+  return (
+    <div
+      style={{
+        padding: '12px 14px',
+        borderRadius: 10,
+        background: 'rgb(26, 32, 40)',
+        border: '1px solid rgb(43, 52, 65)',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+        <Icon style={{ width: 13, height: 13, color: iconColor }} />
+        <span style={{ fontSize: 11, fontWeight: 600, color: 'rgb(130, 140, 155)', letterSpacing: '0.03em', textTransform: 'uppercase' }}>
+          {label}
+        </span>
+      </div>
+      <p style={{ fontSize: 13, lineHeight: 1.55, color: 'rgb(210, 220, 235)', margin: 0 }}>{text}</p>
     </div>
   );
 }

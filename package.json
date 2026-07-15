@@ -8,7 +8,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && electron-builder --win --dir",
+    "build": "vite build && electron-builder --win --dir && node -e \"import('rcedit').then(m => m.rcedit('dist/win-unpacked/CachePilot.exe', { icon: 'build/icon.ico' })).then(() => console.log('Icon patched'))\"",
     "build:installer": "vite build && electron-builder --win --dir && node -e \"import('rcedit').then(m => m.rcedit('dist/win-unpacked/CachePilot.exe', { icon: 'build/icon.ico' })).then(() => console.log('Icon patched'))\" && electron-builder --win nsis --prepackaged dist/win-unpacked",
     "build:icon": "vite build && electron-builder --win --dir && node -e \"import('rcedit').then(m => m.rcedit('dist/win-unpacked/CachePilot.exe', { icon: 'build/icon.ico' })).then(() => console.log('Icon patched'))\"",
     "build:publish": "vite build && electron-builder --win --dir && node -e \"import('rcedit').then(m => m.rcedit('dist/win-unpacked/CachePilot.exe', { icon: 'build/icon.ico' })).then(() => console.log('Icon patched'))\" && electron-builder --win nsis --prepackaged dist/win-unpacked --publish always",
