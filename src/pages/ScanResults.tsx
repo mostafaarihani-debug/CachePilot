@@ -21,6 +21,7 @@ import {
   Sparkles,
   Shield,
   FileText,
+  ScanSearch,
 } from 'lucide-react';
 
 export function ScanResults() {
@@ -185,33 +186,77 @@ export function ScanResults() {
     : 'This will clean safe cache categories. You can safely proceed.';
 
   return (
-    <div className="flex-1 p-8 overflow-auto">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <ScanProgress />
-
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-txt tracking-tight">Scan Results</h1>
-            <p className="text-txt-secondary mt-1">
-              {latestScan
-                ? `Found ${formatSize(latestScan.totalSize)} across ${latestScan.categories.length} categories`
-                : 'Run a scan to see what can be cleaned'}
-            </p>
+    <div className="flex-1 overflow-auto" style={{ background: 'rgb(15, 17, 21)' }}>
+      {/* Header */}
+      <div
+        style={{
+          background: 'linear-gradient(180deg, rgba(77, 163, 255, 0.06) 0%, transparent 100%)',
+          borderBottom: '1px solid rgba(43, 52, 65, 0.5)',
+        }}
+      >
+        <div className="max-w-5xl mx-auto px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 12,
+                  background: 'linear-gradient(135deg, rgba(77, 163, 255, 0.15), rgba(77, 163, 255, 0.05))',
+                  border: '1px solid rgba(77, 163, 255, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <ScanSearch className="w-5 h-5" style={{ color: 'rgb(77, 163, 255)' }} />
+              </div>
+              <div>
+                <h1 style={{ fontSize: 22, fontWeight: 700, color: 'rgb(232, 237, 245)' }}>Scan Results</h1>
+                <p style={{ fontSize: 13, color: 'rgb(116, 130, 148)', marginTop: 2 }}>
+                  {latestScan
+                    ? `Found ${formatSize(latestScan.totalSize)} across ${latestScan.categories.length} categories`
+                    : 'Run a scan to see what can be cleaned'}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={handleScan}
+              disabled={isScanning}
+              style={{
+                padding: '10px 24px',
+                borderRadius: 10,
+                border: 'none',
+                background: isScanning ? 'rgba(77, 163, 255, 0.15)' : 'linear-gradient(135deg, rgb(77, 163, 255), rgb(168, 130, 255))',
+                color: 'white',
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: isScanning ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                boxShadow: isScanning ? 'none' : '0 0 20px rgba(77, 163, 255, 0.3)',
+                transition: 'all 0.2s',
+              }}
+            >
+              {isScanning ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Scanning...
+                </>
+              ) : (
+                <>
+                  <Search className="w-4 h-4" />
+                  {latestScan ? 'Rescan' : 'Scan Now'}
+                </>
+              )}
+            </button>
           </div>
-          <button onClick={handleScan} disabled={isScanning} className="btn-primary">
-            {isScanning ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Scanning...
-              </>
-            ) : (
-              <>
-                <Search className="w-4 h-4" />
-                {latestScan ? 'Rescan' : 'Scan Now'}
-              </>
-            )}
-          </button>
         </div>
+      </div>
+
+      {/* Content */}
+      <div className="max-w-5xl mx-auto px-8 py-6 space-y-6">
 
         {latestScan && selectedCategories.size > 0 && (
           <div className="card-elevated flex items-center justify-between">
@@ -231,7 +276,21 @@ export function ScanResults() {
             <button
               onClick={handleCleanClick}
               disabled={isCleaning}
-              className="btn-success"
+              style={{
+                padding: '10px 24px',
+                borderRadius: 10,
+                border: 'none',
+                background: isCleaning ? 'rgba(56, 210, 122, 0.15)' : 'linear-gradient(135deg, rgb(56, 210, 122), rgb(77, 163, 255))',
+                color: 'white',
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: isCleaning ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                boxShadow: isCleaning ? 'none' : '0 0 20px rgba(56, 210, 122, 0.3)',
+                transition: 'all 0.2s',
+              }}
             >
               {isCleaning ? (
                 <>

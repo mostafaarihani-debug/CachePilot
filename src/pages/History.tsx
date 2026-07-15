@@ -49,12 +49,40 @@ export function History() {
   })() : null;
 
   return (
-    <div className="flex-1 p-8 overflow-auto">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-txt tracking-tight">History</h1>
-          <p className="text-txt-secondary mt-1">View your previous scans and cleanup actions</p>
+    <div className="flex-1 overflow-auto" style={{ background: 'rgb(15, 17, 21)' }}>
+      {/* Header */}
+      <div
+        style={{
+          background: 'linear-gradient(180deg, rgba(168, 130, 255, 0.06) 0%, transparent 100%)',
+          borderBottom: '1px solid rgba(43, 52, 65, 0.5)',
+        }}
+      >
+        <div className="max-w-5xl mx-auto px-8 py-6">
+          <div className="flex items-center gap-3">
+            <div
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 12,
+                background: 'linear-gradient(135deg, rgba(168, 130, 255, 0.15), rgba(168, 130, 255, 0.05))',
+                border: '1px solid rgba(168, 130, 255, 0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <HistoryIcon className="w-5 h-5" style={{ color: 'rgb(168, 130, 255)' }} />
+            </div>
+            <div>
+              <h1 style={{ fontSize: 22, fontWeight: 700, color: 'rgb(232, 237, 245)' }}>History</h1>
+              <p style={{ fontSize: 13, color: 'rgb(116, 130, 148)', marginTop: 2 }}>View your previous scans and cleanup actions</p>
+            </div>
+          </div>
         </div>
+      </div>
+
+      {/* Content */}
+      <div className="max-w-5xl mx-auto px-8 py-6 space-y-6">
 
         {scanHistory.length > 0 ? (
           <>
@@ -205,14 +233,40 @@ export function History() {
                 <>
                   <button
                     onClick={() => exportAsJSON(scanHistory)}
-                    className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-surface border border-bdr rounded-lg text-txt-secondary hover:bg-surface-2 hover:text-txt transition-colors"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      padding: '6px 14px',
+                      borderRadius: 8,
+                      border: '1px solid rgba(43, 52, 65, 0.8)',
+                      background: 'rgb(21, 26, 33)',
+                      color: 'rgb(168, 179, 194)',
+                      fontSize: 12,
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s',
+                    }}
                   >
                     <Download className="w-3.5 h-3.5" />
                     Export JSON
                   </button>
                   <button
                     onClick={() => exportAsCSV(scanHistory)}
-                    className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-surface border border-bdr rounded-lg text-txt-secondary hover:bg-surface-2 hover:text-txt transition-colors"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      padding: '6px 14px',
+                      borderRadius: 8,
+                      border: '1px solid rgba(43, 52, 65, 0.8)',
+                      background: 'rgb(21, 26, 33)',
+                      color: 'rgb(168, 179, 194)',
+                      fontSize: 12,
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s',
+                    }}
                   >
                     <Download className="w-3.5 h-3.5" />
                     Export CSV

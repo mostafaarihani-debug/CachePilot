@@ -10,6 +10,7 @@ import {
   AlertTriangle,
   ShieldCheck,
   ShieldAlert,
+  LayoutDashboard,
 } from 'lucide-react';
 import { ScanProgress } from '../components/ScanProgress';
 import { DashboardSkeleton } from '../components/Skeleton';
@@ -67,8 +68,73 @@ export function Dashboard() {
   };
 
   return (
-    <div className="flex-1 p-8 overflow-auto">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="flex-1 overflow-auto" style={{ background: 'rgb(15, 17, 21)' }}>
+      {/* Header */}
+      <div
+        style={{
+          background: 'linear-gradient(180deg, rgba(56, 210, 122, 0.06) 0%, transparent 100%)',
+          borderBottom: '1px solid rgba(43, 52, 65, 0.5)',
+        }}
+      >
+        <div className="max-w-5xl mx-auto px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 12,
+                  background: 'linear-gradient(135deg, rgba(56, 210, 122, 0.15), rgba(56, 210, 122, 0.05))',
+                  border: '1px solid rgba(56, 210, 122, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <LayoutDashboard className="w-5 h-5" style={{ color: 'rgb(56, 210, 122)' }} />
+              </div>
+              <div>
+                <h1 style={{ fontSize: 22, fontWeight: 700, color: 'rgb(232, 237, 245)' }}>Dashboard</h1>
+                <p style={{ fontSize: 13, color: 'rgb(116, 130, 148)', marginTop: 2 }}>Scan and clean your PC cache safely</p>
+              </div>
+            </div>
+            <button
+              onClick={handleScan}
+              disabled={isScanning}
+              style={{
+                padding: '10px 24px',
+                borderRadius: 10,
+                border: 'none',
+                background: isScanning ? 'rgba(77, 163, 255, 0.15)' : 'linear-gradient(135deg, rgb(77, 163, 255), rgb(168, 130, 255))',
+                color: 'white',
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: isScanning ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                boxShadow: isScanning ? 'none' : '0 0 20px rgba(77, 163, 255, 0.3)',
+                transition: 'all 0.2s',
+              }}
+            >
+              {isScanning ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Scanning...
+                </>
+              ) : (
+                <>
+                  <Search className="w-4 h-4" />
+                  Scan Now
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="max-w-5xl mx-auto px-8 py-6 space-y-6">
         {adminStatus === false && (
           <div className="flex items-center justify-between p-4 rounded-xl bg-warning/10 border border-warning/20">
             <div className="flex items-center gap-3">
@@ -80,7 +146,19 @@ export function Dashboard() {
                 </p>
               </div>
             </div>
-            <button onClick={handleElevate} className="btn-ghost text-warning text-sm">
+            <button
+              onClick={handleElevate}
+              style={{
+                padding: '6px 14px',
+                borderRadius: 8,
+                border: '1px solid rgba(255, 167, 38, 0.3)',
+                background: 'transparent',
+                color: 'rgb(255, 167, 38)',
+                fontSize: 13,
+                fontWeight: 500,
+                cursor: 'pointer',
+              }}
+            >
               Elevate
             </button>
           </div>
@@ -120,37 +198,26 @@ export function Dashboard() {
             {!scanCountInfo.canScan && (
               <button
                 onClick={() => setShowUpgradeModal(true)}
-                className="text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: 8,
+                  border: 'none',
+                  background: 'linear-gradient(135deg, rgb(77, 163, 255), rgb(168, 130, 255))',
+                  color: 'white',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
               >
                 Upgrade to Pro
               </button>
             )}
           </div>
         )}
+      </div>
 
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-txt tracking-tight">Dashboard</h1>
-            <p className="text-txt-secondary mt-1">Scan and clean your PC cache safely</p>
-          </div>
-          <button
-            onClick={handleScan}
-            disabled={isScanning}
-            className="btn-primary text-base px-6 py-3"
-          >
-            {isScanning ? (
-              <>
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Scanning...
-              </>
-            ) : (
-              <>
-                <Search className="w-5 h-5" />
-                Scan Now
-              </>
-            )}
-          </button>
-        </div>
+      {/* Content */}
+      <div className="max-w-5xl mx-auto px-8 py-6 space-y-6">
 
         <ScanProgress />
 
@@ -373,13 +440,32 @@ export function Dashboard() {
                     }
                   }
                 }}
-                className="flex-1 px-4 py-2.5 rounded-lg bg-primary text-white text-sm font-semibold"
+                style={{
+                  flex: 1,
+                  padding: '10px 16px',
+                  borderRadius: 10,
+                  border: 'none',
+                  background: 'linear-gradient(135deg, rgb(77, 163, 255), rgb(168, 130, 255))',
+                  color: 'white',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  boxShadow: '0 0 20px rgba(77, 163, 255, 0.3)',
+                }}
               >
                 Activate
               </button>
               <button
                 onClick={() => setShowActivateWindow(false)}
-                className="px-4 py-2.5 rounded-lg border border-bdr text-txt-secondary text-sm"
+                style={{
+                  padding: '10px 16px',
+                  borderRadius: 10,
+                  border: '1px solid rgb(43, 52, 65)',
+                  background: 'transparent',
+                  color: 'rgb(168, 179, 194)',
+                  fontSize: 14,
+                  cursor: 'pointer',
+                }}
               >
                 Cancel
               </button>
