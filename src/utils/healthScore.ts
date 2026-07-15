@@ -68,7 +68,7 @@ export function calculateHealthScore(
     reasons.push(`${(totalFreed / (1024 * 1024 * 1024)).toFixed(1)} GB freed over time`);
   }
 
-  score = Math.max(10, Math.min(99, score));
+  score = Math.max(10, Math.min(100, score));
 
   let label: HealthScore['label'];
   if (score >= 85) {

@@ -68,6 +68,8 @@ function AppContent() {
       return;
     }
 
+    const cleanups: (() => void)[] = [];
+
     // Check license status
     api.getLicenseStatus().then((status: LicenseStatus) => {
       setLicenseStatus(status);
@@ -87,9 +89,9 @@ function AppContent() {
     });
 
     // Listen for license status changes
-    api.onLicenseStatus((status: LicenseStatus) => {
+    cleanups.push(api.onLicenseStatus((status: LicenseStatus) => {
       setLicenseStatus(status);
-    });
+    }));
 
     api.isAdmin().then((isAdm) => {
       if (!isAdm) {
@@ -105,7 +107,7 @@ function AppContent() {
       }
     });
 
-    api.onUpdateStatus((status: UpdateStatus) => {
+    cleanups.push(api.onUpdateStatus((status: UpdateStatus) => {
       switch (status.status) {
         case 'available':
           addToast({
@@ -132,7 +134,11 @@ function AppContent() {
           });
           break;
       }
-    });
+    }));
+
+    return () => {
+      cleanups.forEach((cleanup) => cleanup());
+    };
   }, []);
 
   if (!wizardChecked || !licenseChecked) return null;

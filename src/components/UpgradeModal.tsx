@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Crown, CheckCircle, ArrowRight } from 'lucide-react';
 
 interface UpgradeModalProps {
@@ -7,6 +8,38 @@ interface UpgradeModalProps {
 }
 
 export function UpgradeModal({ isOpen, onClose, onActivateKey }: UpgradeModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      const modal = modalRef.current;
+      const focusable = modal?.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (focusable && focusable.length > 0) {
+        focusable[0].focus();
+      }
+
+      const keyHandler = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          onClose();
+          return;
+        }
+        if (e.key === 'Tab' && focusable && focusable.length > 0) {
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      };
+      window.addEventListener('keydown', keyHandler);
+      return () => window.removeEventListener('keydown', keyHandler);
+    }
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleGetPro = () => {
@@ -34,6 +67,7 @@ export function UpgradeModal({ isOpen, onClose, onActivateKey }: UpgradeModalPro
       }}
     >
       <div
+        ref={modalRef}
         onClick={(e) => e.stopPropagation()}
         style={{
           width: 440,

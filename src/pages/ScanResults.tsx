@@ -9,7 +9,6 @@ import {
 import { updateScanSession, getScanHistory } from '../db/queries';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { CleanupResults } from '../components/CleanupResults';
-import { ScanProgress } from '../components/ScanProgress';
 import { CategoryIcon } from '../components/CategoryIcon';
 import {
   Search,

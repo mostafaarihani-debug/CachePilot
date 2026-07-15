@@ -1,32 +1,4 @@
-import {
-  Globe,
-  Cookie,
-  FileClock,
-  Download,
-  Network,
-  Store,
-  Image,
-  LayoutGrid,
-  Zap,
-  Monitor,
-  Box,
-  FileText,
-} from 'lucide-react';
-
-const iconMap: Record<string, typeof Globe> = {
-  Globe,
-  Cookie,
-  FileTemporary: FileClock,
-  Download,
-  Network,
-  Store,
-  Image,
-  LayoutGrid,
-  Zap,
-  Monitor,
-  Box,
-  FileText,
-};
+import { getCategoryIcon } from '../utils/iconMap';
 
 interface CategoryIconProps {
   iconName: string;
@@ -36,6 +8,6 @@ interface CategoryIconProps {
 }
 
 export function CategoryIcon({ iconName, size = 16, color, className }: CategoryIconProps) {
-  const Icon = iconMap[iconName] || Globe;
+  const Icon = getCategoryIcon(iconName);
   return <Icon style={{ width: size, height: size, color, flexShrink: 0 }} className={className} />;
 }

@@ -74,8 +74,9 @@ export async function runScan(): Promise<ScanSession | null> {
         }
       };
 
-      window.electronAPI.onScanProgress(progressHandler);
+      const cleanup = window.electronAPI.onScanProgress(progressHandler);
       rawResults = await window.electronAPI.scanCaches();
+      cleanup();
     } catch {
       rawResults = [];
     }

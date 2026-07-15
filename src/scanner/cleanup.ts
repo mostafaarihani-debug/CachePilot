@@ -23,7 +23,7 @@ export interface CleanupReport {
 
 export function validateCleanupTargets(
   selectedCategories: CategoryResult[]
-): { valid: boolean; warnings: string[] } {
+): { warnings: string[] } {
   const warnings: string[] = [];
 
   for (const cat of selectedCategories) {
@@ -54,10 +54,7 @@ export function validateCleanupTargets(
     }
   }
 
-  return {
-    valid: true,
-    warnings,
-  };
+  return { warnings };
 }
 
 export async function runCleanup(

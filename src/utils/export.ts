@@ -20,6 +20,13 @@ export function exportAsJSON(sessions: ScanSession[]) {
   downloadBlob(blob, `cachepilot-history-${formatDateForFile()}.json`);
 }
 
+function sanitizeCsvCell(value: string): string {
+  if (/^[=+\-@\t\r]/.test(value)) {
+    return `'${value}`;
+  }
+  return value;
+}
+
 export function exportAsCSV(sessions: ScanSession[]) {
   const rows: string[][] = [
     ['Date', 'Status', 'Total Size (MB)', 'Items', 'Size Freed (MB)', ...sessions[0]?.categories.map((c) => c.name) ?? []],
@@ -37,7 +44,7 @@ export function exportAsCSV(sessions: ScanSession[]) {
     ]);
   }
 
-  const csv = rows.map((r) => r.map((cell) => `"${cell}"`).join(',')).join('\n');
+  const csv = rows.map((r) => r.map((cell) => `"${sanitizeCsvCell(cell)}"`).join(',')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   downloadBlob(blob, `cachepilot-history-${formatDateForFile()}.csv`);
 }

@@ -1,38 +1,6 @@
 import { useAppStore, formatSize } from '../store';
 import { cacheCategories } from '../scanner/categories';
-import {
-  Globe,
-  Cookie,
-  FileClock,
-  Download,
-  Network,
-  Store,
-  Image,
-  LayoutGrid,
-  Zap,
-  Monitor,
-  Box,
-  FileText,
-} from 'lucide-react';
-
-const iconMap: Record<string, typeof Globe> = {
-  Globe,
-  Cookie,
-  FileTemporary: FileClock,
-  Download,
-  Network,
-  Store,
-  Image,
-  LayoutGrid,
-  Zap,
-  Monitor,
-  Box,
-  FileText,
-};
-
-function getCategoryIcon(iconName: string) {
-  return iconMap[iconName] || Globe;
-}
+import { getCategoryIcon } from '../utils/iconMap';
 
 export function ScanProgress() {
   const { scanProgress, isScanning } = useAppStore();
@@ -200,12 +168,6 @@ export function ScanProgress() {
           })}
         </div>
       </div>
-
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 }

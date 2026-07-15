@@ -50,10 +50,6 @@ export function saveCleanupAction(_action: CleanupAction): void {
   addHistoryEvent('cleanup', `Cleaned ${_action.itemsCleaned} items, freed ${_action.sizeFreed} bytes`);
 }
 
-export function getCleanupHistory(): CleanupAction[] {
-  return [];
-}
-
 export function getSettings(): Record<string, string> {
   try {
     const data = localStorage.getItem('cachepilot_settings');

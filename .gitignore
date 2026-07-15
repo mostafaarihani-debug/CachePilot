@@ -4,3 +4,9 @@ dist-electron/
 *.log
 .DS_Store
 Thumbs.db
+
+# Temp release files
+.tmp-*
+skills-lock.json
+the-book-of-secret-knowledge/
+.agents/

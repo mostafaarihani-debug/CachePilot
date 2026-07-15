@@ -224,6 +224,18 @@ function createWindow(startMinimized: boolean) {
     }
   } catch {}
 
+  let boundsSaveTimer: ReturnType<typeof setTimeout> | null = null;
+  function saveBoundsDebounced() {
+    if (boundsSaveTimer) clearTimeout(boundsSaveTimer);
+    boundsSaveTimer = setTimeout(() => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        try {
+          fs.writeFileSync(boundsPath, JSON.stringify(mainWindow.getBounds()));
+        } catch {}
+      }
+    }, 500);
+  }
+
   Menu.setApplicationMenu(null);
   mainWindow = new BrowserWindow({
     width: windowBounds?.width ?? 1200,
@@ -254,21 +266,9 @@ function createWindow(startMinimized: boolean) {
     }
   });
 
-  mainWindow.on('resize', () => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      try {
-        fs.writeFileSync(boundsPath, JSON.stringify(mainWindow.getBounds()));
-      } catch {}
-    }
-  });
+  mainWindow.on('resize', saveBoundsDebounced);
 
-  mainWindow.on('move', () => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      try {
-        fs.writeFileSync(boundsPath, JSON.stringify(mainWindow.getBounds()));
-      } catch {}
-    }
-  });
+  mainWindow.on('move', saveBoundsDebounced);
 
   mainWindow.on('close', (e) => {
     if (!isQuitting) {

@@ -17,7 +17,6 @@ import {
   Cpu,
   Calendar,
   FolderOpen,
-  Key,
   Crown,
   ChevronRight,
   Sparkles,
@@ -101,7 +100,7 @@ export function Settings() {
     api.getUpdateStatus().then(setUpdateStatus).catch(() => {});
     api.getScheduledScan().then(setIsTaskScheduled).catch(() => {});
 
-    api.onUpdateStatus((status: UpdateStatus) => {
+    const cleanup = api.onUpdateStatus((status: UpdateStatus) => {
       setUpdateStatus(status);
       if (status.status === 'downloaded') {
         addToast({
@@ -118,6 +117,8 @@ export function Settings() {
         });
       }
     });
+
+    return () => cleanup();
   }, []);
 
   const update = async (partial: Partial<AppSettings>) => {

@@ -32,7 +32,7 @@ export function Dashboard() {
 
   useEffect(() => {
     window.electronAPI?.isAdmin().then(setAdminStatus);
-    window.electronAPI?.onTriggerScan(() => {
+    const cleanup = window.electronAPI?.onTriggerScan(() => {
       handleScan();
     });
 
@@ -42,7 +42,10 @@ export function Dashboard() {
     });
 
     const timer = setTimeout(() => setIsLoading(false), 300);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      cleanup?.();
+    };
   }, []);
 
   if (isLoading) return <DashboardSkeleton />;

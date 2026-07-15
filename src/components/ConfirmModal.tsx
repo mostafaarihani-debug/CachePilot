@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { AlertTriangle, X, CheckCircle2 } from 'lucide-react';
 
 interface ConfirmModalProps {
@@ -50,14 +50,35 @@ export function ConfirmModal({
 }: ConfirmModalProps) {
   const style = variantStyles[variant];
   const Icon = style.icon;
+  const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen) {
-      const handler = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') onCancel();
+      const modal = modalRef.current;
+      const focusable = modal?.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (focusable && focusable.length > 0) {
+        focusable[0].focus();
+      }
+
+      const keyHandler = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          onCancel();
+          return;
+        }
+        if (e.key === 'Tab' && focusable && focusable.length > 0) {
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
       };
-      window.addEventListener('keydown', handler);
-      return () => window.removeEventListener('keydown', handler);
+      window.addEventListener('keydown', keyHandler);
+      return () => window.removeEventListener('keydown', keyHandler);
     }
   }, [isOpen, onCancel]);
 
@@ -65,6 +86,7 @@ export function ConfirmModal({
 
   return (
     <div
+      data-modal-overlay
       style={{
         position: 'fixed',
         inset: 0,
@@ -75,7 +97,6 @@ export function ConfirmModal({
       }}
     >
       <div
-        data-modal-overlay
         onClick={onCancel}
         style={{
           position: 'absolute',
@@ -85,6 +106,7 @@ export function ConfirmModal({
         }}
       />
       <div
+        ref={modalRef}
         style={{
           position: 'relative',
           width: 440,

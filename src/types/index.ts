@@ -148,20 +148,20 @@ export interface ElectronAPI {
   requestElevation: () => Promise<void>;
   getSettings: () => Promise<AppSettings>;
   saveSettings: (settings: Partial<AppSettings>) => Promise<AppSettings>;
-  onScanProgress: (callback: (data: ScanProgress) => void) => void;
+  onScanProgress: (callback: (data: ScanProgress) => void) => () => void;
   onBackgroundScanComplete: (callback: (data: {
     totalSize: number;
     totalItems: number;
     categories: { categoryId: string; itemCount: number; totalSize: number }[];
-  }) => void) => void;
-  onTriggerScan: (callback: () => void) => void;
+  }) => void) => () => void;
+  onTriggerScan: (callback: () => void) => () => void;
   minimizeToTray: () => Promise<void>;
   checkForUpdates: () => Promise<void>;
   downloadUpdate: () => Promise<void>;
   quitAndInstall: () => Promise<void>;
   getUpdateStatus: () => Promise<UpdateStatus>;
   getAppInfo: () => Promise<AppInfo>;
-  onUpdateStatus: (callback: (data: UpdateStatus) => void) => void;
+  onUpdateStatus: (callback: (data: UpdateStatus) => void) => () => void;
   setScheduledScan: (intervalMinutes: number) => Promise<boolean>;
   getScheduledScan: () => Promise<boolean>;
   cancelScheduledScan: () => Promise<boolean>;
@@ -171,7 +171,7 @@ export interface ElectronAPI {
   deactivateLicense: () => Promise<{ success: boolean }>;
   getScanCount: () => Promise<ScanCountInfo>;
   checkScanLimit: () => Promise<ScanCountInfo>;
-  onLicenseStatus: (callback: (status: LicenseStatus) => void) => void;
+  onLicenseStatus: (callback: (status: LicenseStatus) => void) => () => void;
 }
 
 declare global {
