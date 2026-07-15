@@ -22,10 +22,22 @@ const VITE_DEV_SERVER_URL = process.env.VITE_DEV_SERVER_URL;
 
 app.name = 'CachePilot';
 
+if (process.platform === 'win32') {
+  app.setAppUserModelId('com.cachepilot.app');
+}
+
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let autoScanTimer: ReturnType<typeof setInterval> | null = null;
 let isQuitting = false;
+
+function showMainWindow() {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  if (!mainWindow.isVisible()) mainWindow.show();
+  if (mainWindow.isMinimized()) mainWindow.restore();
+  mainWindow.focus();
+  mainWindow.moveTop();
+}
 
 const SETTINGS_PATH = path.join(app.getPath('userData'), 'settings.json');
 
@@ -122,11 +134,8 @@ function performBackgroundScan() {
         silent: false,
       });
       n.on('click', () => {
-        if (mainWindow) {
-          mainWindow.show();
-          mainWindow.focus();
-          mainWindow.webContents.send('trigger-scan');
-        }
+        showMainWindow();
+        mainWindow?.webContents.send('trigger-scan');
       });
       n.show();
     }
@@ -181,22 +190,14 @@ function createTray() {
   const contextMenu = Menu.buildFromTemplate([
     {
       label: 'Show CachePilot',
-      click: () => {
-        if (mainWindow) {
-          mainWindow.show();
-          mainWindow.focus();
-        }
-      },
+      click: () => showMainWindow(),
     },
     { type: 'separator' },
     {
       label: 'Scan Now',
       click: () => {
-        if (mainWindow) {
-          mainWindow.show();
-          mainWindow.focus();
-          mainWindow.webContents.send('trigger-scan');
-        }
+        showMainWindow();
+        mainWindow?.webContents.send('trigger-scan');
       },
     },
     { type: 'separator' },
@@ -211,12 +212,7 @@ function createTray() {
 
   tray.setContextMenu(contextMenu);
 
-  tray.on('double-click', () => {
-    if (mainWindow) {
-      mainWindow.show();
-      mainWindow.focus();
-    }
-  });
+  tray.on('double-click', () => showMainWindow());
 }
 
 function createWindow(startMinimized: boolean) {
@@ -292,12 +288,7 @@ const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) {
   app.quit();
 } else {
-  app.on('second-instance', () => {
-    if (mainWindow) {
-      mainWindow.show();
-      mainWindow.focus();
-    }
-  });
+  app.on('second-instance', () => showMainWindow());
 
   app.whenReady().then(async () => {
     log.info('CachePilot starting', { version: app.getVersion(), platform: process.platform, arch: process.arch });
@@ -334,12 +325,7 @@ if (!gotLock) {
             body: 'Running in the background. Double-click the tray icon to open.',
             icon: getNotificationIcon(),
           });
-          n.on('click', () => {
-            if (mainWindow) {
-              mainWindow.show();
-              mainWindow.focus();
-            }
-          });
+          n.on('click', () => showMainWindow());
           n.show();
         } catch {
           setTimeout(() => tryNotify(attempts - 1), 5000);
@@ -350,7 +336,7 @@ if (!gotLock) {
 
     app.on('activate', () => {
       if (mainWindow) {
-        mainWindow.show();
+        showMainWindow();
       } else {
         createWindow(false);
       }
