@@ -102,7 +102,7 @@ export function Pricing() {
           </div>
 
           <a
-            href="https://github.com/mostafaarihani-debug/CachePilot/releases/download/v1.1.7/CachePilot-Setup-1.1.7.exe"
+            href="https://github.com/mostafaarihani-debug/CachePilot/releases/download/v1.1.8/CachePilot-Setup-1.1.8.exe"
             className="btn-primary"
             style={{ width: '100%', textAlign: 'center' }}
           >
