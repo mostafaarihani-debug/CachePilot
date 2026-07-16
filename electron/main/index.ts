@@ -245,6 +245,7 @@ function createWindow(startMinimized: boolean) {
     minWidth: 900,
     minHeight: 600,
     title: 'CachePilot',
+    icon: getNotificationIcon(),
     backgroundColor: '#0F1115',
     show: false,
     webPreferences: {

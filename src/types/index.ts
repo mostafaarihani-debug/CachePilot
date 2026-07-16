@@ -195,8 +195,4 @@ export interface AppState {
   setScanHistory: (history: ScanSession[]) => void;
   settings: UserSetting[];
   setSettings: (settings: UserSetting[]) => void;
-  licenseStatus: LicenseStatus | null;
-  setLicenseStatus: (status: LicenseStatus | null) => void;
-  scanCountInfo: ScanCountInfo | null;
-  setScanCountInfo: (info: ScanCountInfo | null) => void;
 }

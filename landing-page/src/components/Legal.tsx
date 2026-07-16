@@ -15,35 +15,31 @@ const termsContent = [
       },
       {
         heading: '2. Description of Service',
-        text: 'CachePilot is a free, open-source desktop application that helps users identify and remove temporary cache files from their Windows PC. The Software operates entirely locally on your device — no data is transmitted to external servers.',
+        text: 'CachePilot is a desktop application that helps users identify and remove temporary cache files from their Windows PC. The Software operates entirely locally on your device — no data is transmitted to external servers.',
       },
       {
-        heading: '3. License',
-        text: 'CachePilot is released under the MIT License. You are free to use, modify, and distribute the Software in accordance with the terms of that license.',
-      },
-      {
-        heading: '4. User Responsibilities',
+        heading: '3. User Responsibilities',
         text: 'You are responsible for understanding what each cache type does before cleaning it. CachePilot provides plain-language explanations for every cache category, including potential side effects. It is your responsibility to review these explanations before confirming any cleanup action.',
       },
       {
-        heading: '5. Data & Privacy',
+        heading: '4. Data & Privacy',
         text: 'CachePilot does not collect, transmit, or store any personal data on external servers. All scan results, settings, and history are stored locally on your device. No analytics, telemetry, or tracking is performed.',
       },
       {
-        heading: '6. Disclaimer of Warranties',
+        heading: '5. Disclaimer of Warranties',
         text: 'The Software is provided "as is" without warranties of any kind. While we strive to make CachePilot safe and accurate, we cannot guarantee that cache cleaning will never cause unintended side effects such as signed-out sessions or reset preferences.',
       },
       {
-        heading: '7. Limitation of Liability',
+        heading: '6. Limitation of Liability',
         text: 'In no event shall the developers of CachePilot be liable for any damages arising from the use or inability to use the Software. You are solely responsible for any data loss or system changes resulting from cache cleanup actions.',
       },
       {
-        heading: '8. Changes to Terms',
+        heading: '7. Changes to Terms',
         text: 'We may update these Terms of Service from time to time. Continued use of the Software after changes constitutes acceptance of the new terms.',
       },
       {
-        heading: '9. Contact',
-        text: 'For questions about these Terms, contact us at support@cachepilot.app or open an issue on GitHub.',
+        heading: '8. Contact',
+        text: 'For questions about these Terms, contact us at support@cachepilot.app.',
       },
     ],
   },
@@ -75,20 +71,16 @@ const privacyContent = [
         text: 'CachePilot does not integrate with any third-party analytics, advertising, or data processing services. There are no SDKs or libraries that transmit data externally.',
       },
       {
-        heading: '6. Open Source',
-        text: 'CachePilot is open source. You can inspect the full source code on GitHub to verify these privacy claims. Transparency is fundamental to our approach.',
-      },
-      {
-        heading: '7. Updates',
+        heading: '6. Updates',
         text: 'When CachePilot checks for updates, it contacts GitHub\'s servers to check for new releases. This request does not contain any personal data — only the current version number of the Software.',
       },
       {
-        heading: '8. Changes to This Policy',
+        heading: '7. Changes to This Policy',
         text: 'If this Privacy Policy changes, the updated version will be posted on our website. We will not materially reduce your privacy protections without notice.',
       },
       {
-        heading: '9. Contact',
-        text: 'For privacy-related questions, contact us at support@cachepilot.app or open an issue on GitHub.',
+        heading: '8. Contact',
+        text: 'For privacy-related questions, contact us at support@cachepilot.app.',
       },
     ],
   },

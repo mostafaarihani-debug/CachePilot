@@ -3,13 +3,12 @@ import { Sidebar } from './components/Sidebar';
 import { useAppStore, loadInitialData } from './store';
 import ToastContainer from './components/ToastContainer';
 import { useToastStore } from './store/toastStore';
-import type { UpdateStatus, LicenseStatus } from './types';
+import type { UpdateStatus } from './types';
 import { PageErrorBoundary } from './components/PageErrorBoundary';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { WelcomeWizard, hasCompletedWizard } from './components/WelcomeWizard';
 import { initCrashReporter } from './utils/crashReporter';
 import { DashboardSkeleton } from './components/Skeleton';
-import { ActivateWindow } from './components/ActivateWindow';
 
 const Dashboard = lazy(() => import('./pages/Dashboard').then((m) => ({ default: m.Dashboard })));
 const ScanResults = lazy(() => import('./pages/ScanResults').then((m) => ({ default: m.ScanResults })));
@@ -43,14 +42,12 @@ class ErrorBoundary extends React.Component<
 }
 
 function AppContent() {
-  const { currentPage, setLicenseStatus, setScanCountInfo } = useAppStore();
+  const { currentPage } = useAppStore();
   const addToast = useToastStore((s) => s.addToast);
   useKeyboardShortcuts();
 
   const [showWizard, setShowWizard] = useState(false);
   const [wizardChecked, setWizardChecked] = useState(false);
-  const [showActivateWindow, setShowActivateWindow] = useState(false);
-  const [licenseChecked, setLicenseChecked] = useState(false);
 
   useEffect(() => {
     initCrashReporter();
@@ -63,35 +60,9 @@ function AppContent() {
     setWizardChecked(true);
 
     const api = window.electronAPI;
-    if (!api) {
-      setLicenseChecked(true);
-      return;
-    }
+    if (!api) return;
 
     const cleanups: (() => void)[] = [];
-
-    // Check license status
-    api.getLicenseStatus().then((status: LicenseStatus) => {
-      setLicenseStatus(status);
-      // If no license and not previously skipped, show activation window
-      const skipped = localStorage.getItem('licenseSkipped') === 'true';
-      if (status.tier === 'free' && !skipped) {
-        setShowActivateWindow(true);
-      }
-      setLicenseChecked(true);
-
-      // Load scan count
-      api.getScanCount().then((info) => {
-        setScanCountInfo(info);
-      });
-    }).catch(() => {
-      setLicenseChecked(true);
-    });
-
-    // Listen for license status changes
-    cleanups.push(api.onLicenseStatus((status: LicenseStatus) => {
-      setLicenseStatus(status);
-    }));
 
     api.isAdmin().then((isAdm) => {
       if (!isAdm) {
@@ -141,7 +112,7 @@ function AppContent() {
     };
   }, []);
 
-  if (!wizardChecked || !licenseChecked) return null;
+  if (!wizardChecked) return null;
 
   const renderPage = () => {
     switch (currentPage) {
@@ -160,9 +131,6 @@ function AppContent() {
 
   return (
     <>
-      {showActivateWindow && (
-        <ActivateWindow onComplete={() => setShowActivateWindow(false)} />
-      )}
       {showWizard && <WelcomeWizard onComplete={() => setShowWizard(false)} />}
       <div className="dark h-screen w-screen flex overflow-hidden" style={{ background: 'rgb(15, 17, 21)', color: 'rgb(232, 237, 245)' }}>
         <Sidebar />

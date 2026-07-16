@@ -71,7 +71,7 @@ export function Footer() {
             zIndex: 1,
           }}
         >
-          Download CachePilot for free. No account needed.
+          Download CachePilot. No account needed.
           Your PC stays fast, your files stay safe.
         </motion.p>
 
@@ -111,7 +111,7 @@ export function Footer() {
             zIndex: 1,
           }}
         >
-          Windows 10/11 · Free & Open Source · No ads, no tracking
+          Windows 10/11 · No ads, no tracking
         </motion.p>
       </section>
 

@@ -34,7 +34,7 @@ export function Pricing() {
               color: '#38D27A',
             }}
           >
-            Free & Open Source
+            Everything Included
           </motion.span>
 
           <motion.h2
@@ -51,7 +51,7 @@ export function Pricing() {
               letterSpacing: '-0.02em',
             }}
           >
-            Everything included. Free forever.
+            All features. No limits.
           </motion.h2>
 
           <motion.p
@@ -66,7 +66,7 @@ export function Pricing() {
               margin: '0 auto',
             }}
           >
-            No hidden fees. No pro plans. Just a fast, clean tool that respects your PC.
+            A fast, clean tool that respects your PC.
           </motion.p>
         </div>
 
@@ -107,7 +107,7 @@ export function Pricing() {
             style={{ width: '100%', textAlign: 'center' }}
           >
             <Download style={{ width: 16, height: 16 }} />
-            Download Free
+            Download
           </a>
         </motion.div>
       </div>

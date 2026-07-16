@@ -17,15 +17,9 @@ import {
   Cpu,
   Calendar,
   FolderOpen,
-  Crown,
-  ChevronRight,
-  Sparkles,
 } from 'lucide-react';
 import type { AppSettings, AppInfo, UpdateStatus } from '../types';
 import { useToastStore } from '../store/toastStore';
-import { useAppStore } from '../store';
-import { ProBadge } from '../components/ProBadge';
-import { isPro } from '../utils/isPro';
 
 const INTERVAL_OPTIONS = [
   { label: 'Off', value: 0 },
@@ -89,8 +83,6 @@ export function Settings() {
   const [updateStatus, setUpdateStatus] = useState<UpdateStatus>({ status: 'idle' });
   const [isTaskScheduled, setIsTaskScheduled] = useState(false);
   const addToast = useToastStore((s) => s.addToast);
-  const { licenseStatus, setLicenseStatus } = useAppStore();
-  const userIsPro = isPro(licenseStatus);
 
   useEffect(() => {
     const api = window.electronAPI;
@@ -142,14 +134,6 @@ export function Settings() {
   };
 
   const handleToggleScheduledScan = async (enabled: boolean) => {
-    if (!userIsPro) {
-      addToast({
-        type: 'info',
-        title: 'Pro Feature',
-        message: 'Scheduled scans require CachePilot Pro. Upgrade to unlock.',
-      });
-      return;
-    }
     const api = window.electronAPI;
     if (!api) return;
     if (enabled) {
@@ -166,16 +150,6 @@ export function Settings() {
       if (ok) {
         addToast({ type: 'info', title: 'Schedule Cancelled', message: 'Windows scheduled scan removed' });
       }
-    }
-  };
-
-  const handleProFeatureClick = () => {
-    if (!userIsPro) {
-      addToast({
-        type: 'info',
-        title: 'Pro Feature',
-        message: 'This feature requires CachePilot Pro. Upgrade to unlock.',
-      });
     }
   };
 
@@ -292,25 +266,19 @@ export function Settings() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    opacity: userIsPro ? 1 : 0.5,
-                    cursor: userIsPro ? 'default' : 'pointer',
                   }}
                   className="hover:bg-surface/30"
-                  onClick={!userIsPro ? handleProFeatureClick : undefined}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                     <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(56, 210, 122, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <Zap className="w-4 h-4" style={{ color: 'rgb(56, 210, 122)' }} />
                     </div>
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <p style={{ fontSize: 14, color: 'rgb(232, 237, 245)', fontWeight: 500 }}>Auto-scan on startup</p>
-                        {!userIsPro && <ProBadge size="sm" />}
-                      </div>
+                      <p style={{ fontSize: 14, color: 'rgb(232, 237, 245)', fontWeight: 500 }}>Auto-scan on startup</p>
                       <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)', marginTop: 1 }}>Automatically scan when the app launches</p>
                     </div>
                   </div>
-                  <Toggle enabled={settings.autoScanOnStartup} onToggle={() => userIsPro && update({ autoScanOnStartup: !settings.autoScanOnStartup })} disabled={!userIsPro} />
+                  <Toggle enabled={settings.autoScanOnStartup} onToggle={() => update({ autoScanOnStartup: !settings.autoScanOnStartup })} />
                 </div>
 
                 <div style={{ height: 1, background: 'rgb(43, 52, 65)', margin: '0 24px' }} />
@@ -319,11 +287,8 @@ export function Settings() {
                 <div
                   style={{
                     padding: '14px 24px',
-                    opacity: userIsPro ? 1 : 0.5,
-                    cursor: userIsPro ? 'default' : 'pointer',
                   }}
                   className="hover:bg-surface/30"
-                  onClick={!userIsPro ? handleProFeatureClick : undefined}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -331,10 +296,7 @@ export function Settings() {
                         <Clock className="w-4 h-4" style={{ color: 'rgb(168, 130, 255)' }} />
                       </div>
                       <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <p style={{ fontSize: 14, color: 'rgb(232, 237, 245)', fontWeight: 500 }}>Background scan interval</p>
-                          {!userIsPro && <ProBadge size="sm" />}
-                        </div>
+                        <p style={{ fontSize: 14, color: 'rgb(232, 237, 245)', fontWeight: 500 }}>Background scan interval</p>
                         <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)', marginTop: 1 }}>
                           {settings.autoScanInterval > 0
                             ? `Scans every ${settings.autoScanInterval >= 3600000 ? `${settings.autoScanInterval / 3600000}h` : `${settings.autoScanInterval / 60000}min`}`
@@ -344,8 +306,7 @@ export function Settings() {
                     </div>
                     <select
                       value={settings.autoScanInterval}
-                      onChange={(e) => userIsPro && update({ autoScanInterval: Number(e.target.value) })}
-                      disabled={!userIsPro}
+                      onChange={(e) => update({ autoScanInterval: Number(e.target.value) })}
                       style={{
                         padding: '8px 12px',
                         borderRadius: 8,
@@ -464,27 +425,21 @@ export function Settings() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    opacity: userIsPro ? 1 : 0.5,
-                    cursor: userIsPro ? 'default' : 'pointer',
                   }}
                   className="hover:bg-surface/30"
-                  onClick={!userIsPro ? handleProFeatureClick : undefined}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                     <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(77, 163, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <Calendar className="w-4 h-4" style={{ color: 'rgb(77, 163, 255)' }} />
                     </div>
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <p style={{ fontSize: 14, color: 'rgb(232, 237, 245)', fontWeight: 500 }}>Scheduled scan</p>
-                        {!userIsPro && <ProBadge size="sm" />}
-                      </div>
+                      <p style={{ fontSize: 14, color: 'rgb(232, 237, 245)', fontWeight: 500 }}>Scheduled scan</p>
                       <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)', marginTop: 1 }}>
                         {isTaskScheduled ? 'Active — runs every hour via Windows Task Scheduler' : 'Runs scan automatically via Windows Task Scheduler'}
                       </p>
                     </div>
                   </div>
-                  <Toggle enabled={isTaskScheduled} onToggle={() => handleToggleScheduledScan(!isTaskScheduled)} disabled={!userIsPro} />
+                  <Toggle enabled={isTaskScheduled} onToggle={() => handleToggleScheduledScan(!isTaskScheduled)} />
                 </div>
               </div>
             </div>
@@ -689,150 +644,6 @@ export function Settings() {
 
           {/* Right Column - Info Cards */}
           <div className="space-y-6">
-            {/* License Card */}
-            <div
-              style={{
-                borderRadius: 16,
-                border: '1px solid rgb(43, 52, 65)',
-                background: 'linear-gradient(135deg, rgb(21, 26, 33) 0%, rgb(18, 22, 28) 100%)',
-                overflow: 'hidden',
-              }}
-            >
-              <div
-                style={{
-                  padding: '20px 24px',
-                  borderBottom: '1px solid rgb(43, 52, 65)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                }}
-              >
-                <div
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 10,
-                    background: userIsPro ? 'rgba(56, 210, 122, 0.1)' : 'rgba(168, 130, 255, 0.1)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Crown className="w-4.5 h-4.5" style={{ color: userIsPro ? 'rgb(56, 210, 122)' : 'rgb(168, 130, 255)' }} />
-                </div>
-                <div>
-                  <h3 style={{ fontSize: 15, fontWeight: 600, color: 'rgb(232, 237, 245)' }}>License</h3>
-                  <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)' }}>Manage your plan</p>
-                </div>
-              </div>
-
-              <div style={{ padding: '20px 24px' }}>
-                <div
-                  style={{
-                    padding: 16,
-                    borderRadius: 12,
-                    background: userIsPro
-                      ? 'linear-gradient(135deg, rgba(56, 210, 122, 0.08), rgba(56, 210, 122, 0.02))'
-                      : 'linear-gradient(135deg, rgba(168, 130, 255, 0.08), rgba(168, 130, 255, 0.02))',
-                    border: userIsPro
-                      ? '1px solid rgba(56, 210, 122, 0.2)'
-                      : '1px solid rgba(168, 130, 255, 0.2)',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <Sparkles className="w-4 h-4" style={{ color: userIsPro ? 'rgb(56, 210, 122)' : 'rgb(168, 130, 255)' }} />
-                      <span style={{ fontSize: 14, fontWeight: 600, color: 'rgb(232, 237, 245)' }}>
-                        {userIsPro ? 'CachePilot Pro' : 'CachePilot Free'}
-                      </span>
-                    </div>
-                    <span
-                      style={{
-                        padding: '3px 8px',
-                        borderRadius: 6,
-                        background: userIsPro ? 'rgba(56, 210, 122, 0.15)' : 'rgba(116, 130, 148, 0.15)',
-                        color: userIsPro ? 'rgb(56, 210, 122)' : 'rgb(116, 130, 148)',
-                        fontSize: 11,
-                        fontWeight: 600,
-                      }}
-                    >
-                      {userIsPro ? 'ACTIVE' : 'FREE'}
-                    </span>
-                  </div>
-
-                  {userIsPro && licenseStatus?.licenseKey && (
-                    <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)', fontFamily: 'monospace', marginBottom: 8 }}>
-                      Key: {licenseStatus.licenseKey.slice(0, 8)}...
-                    </p>
-                  )}
-
-                  {!userIsPro && (
-                    <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)', marginBottom: 12 }}>
-                      3 scans per day • Basic features
-                    </p>
-                  )}
-
-                  {userIsPro && licenseStatus?.expiresAt && (
-                    <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)', marginBottom: 12 }}>
-                      Expires: {new Date(licenseStatus.expiresAt).toLocaleDateString()}
-                    </p>
-                  )}
-
-                  {!userIsPro ? (
-                    <button
-                      onClick={() => window.electronAPI?.openExternal('https://cachepilot.gumroad.com/l/cache-pilot')}
-                      style={{
-                        width: '100%',
-                        padding: '10px 16px',
-                        borderRadius: 8,
-                        border: 'none',
-                        background: 'linear-gradient(135deg, rgb(77, 163, 255), rgb(168, 130, 255))',
-                        color: 'white',
-                        fontSize: 13,
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 8,
-                      }}
-                    >
-                      Upgrade to Pro
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={async () => {
-                        if (window.electronAPI) {
-                          const result = await window.electronAPI.deactivateLicense();
-                          if (result.success) {
-                            setLicenseStatus({ tier: 'free', isValid: false });
-                            addToast({
-                              type: 'info',
-                              title: 'License Deactivated',
-                              message: 'CachePilot has been downgraded to Free.',
-                            });
-                          }
-                        }
-                      }}
-                      style={{
-                        width: '100%',
-                        padding: '8px 16px',
-                        borderRadius: 8,
-                        border: '1px solid rgba(255, 107, 107, 0.3)',
-                        background: 'transparent',
-                        color: 'rgb(255, 107, 107)',
-                        fontSize: 12,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      Deactivate License
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-
             {/* About Card */}
             <div
               style={{

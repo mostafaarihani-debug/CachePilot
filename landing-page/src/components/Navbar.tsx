@@ -13,7 +13,6 @@ export function Navbar() {
   const links = [
     { label: 'Features', href: '#features' },
     { label: 'How It Works', href: '#how-it-works' },
-    { label: 'Free Forever', href: '#pricing' },
   ];
 
   return (
@@ -72,7 +71,7 @@ export function Navbar() {
             style={{ padding: '10px 20px', fontSize: 14 }}
           >
             <Download style={{ width: 16, height: 16 }} />
-            Download Free
+            Download
           </a>
         </div>
       </div>

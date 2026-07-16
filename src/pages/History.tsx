@@ -16,12 +16,9 @@ import {
 } from 'lucide-react';
 import { CategoryIcon } from '../components/CategoryIcon';
 import { exportAsJSON, exportAsCSV } from '../utils/export';
-import { ProBadge } from '../components/ProBadge';
-import { isPro } from '../utils/isPro';
 
 export function History() {
-  const { scanHistory, licenseStatus } = useAppStore();
-  const userIsPro = isPro(licenseStatus);
+  const { scanHistory } = useAppStore();
 
   const totalScans = scanHistory.length;
   const cleanedSessions = scanHistory.filter((s) => s.cleanedAt);
@@ -229,60 +226,46 @@ export function History() {
 
             {/* Export Buttons */}
             <div className="flex gap-2 items-center">
-              {userIsPro ? (
-                <>
-                  <button
-                    onClick={() => exportAsJSON(scanHistory)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      padding: '6px 14px',
-                      borderRadius: 8,
-                      border: '1px solid rgba(43, 52, 65, 0.8)',
-                      background: 'rgb(21, 26, 33)',
-                      color: 'rgb(168, 179, 194)',
-                      fontSize: 12,
-                      fontWeight: 500,
-                      cursor: 'pointer',
-                      transition: 'all 0.15s',
-                    }}
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    Export JSON
-                  </button>
-                  <button
-                    onClick={() => exportAsCSV(scanHistory)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      padding: '6px 14px',
-                      borderRadius: 8,
-                      border: '1px solid rgba(43, 52, 65, 0.8)',
-                      background: 'rgb(21, 26, 33)',
-                      color: 'rgb(168, 179, 194)',
-                      fontSize: 12,
-                      fontWeight: 500,
-                      cursor: 'pointer',
-                      transition: 'all 0.15s',
-                    }}
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    Export CSV
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => {}}
-                  disabled
-                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-surface border border-bdr rounded-lg text-txt-muted cursor-not-allowed opacity-60"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  Export
-                  <ProBadge size="sm" />
-                </button>
-              )}
+              <button
+                onClick={() => exportAsJSON(scanHistory)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '6px 14px',
+                  borderRadius: 8,
+                  border: '1px solid rgba(43, 52, 65, 0.8)',
+                  background: 'rgb(21, 26, 33)',
+                  color: 'rgb(168, 179, 194)',
+                  fontSize: 12,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s',
+                }}
+              >
+                <Download className="w-3.5 h-3.5" />
+                Export JSON
+              </button>
+              <button
+                onClick={() => exportAsCSV(scanHistory)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '6px 14px',
+                  borderRadius: 8,
+                  border: '1px solid rgba(43, 52, 65, 0.8)',
+                  background: 'rgb(21, 26, 33)',
+                  color: 'rgb(168, 179, 194)',
+                  fontSize: 12,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s',
+                }}
+              >
+                <Download className="w-3.5 h-3.5" />
+                Export CSV
+              </button>
             </div>
 
             {/* Session Cards */}
