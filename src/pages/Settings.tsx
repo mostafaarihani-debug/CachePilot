@@ -17,6 +17,7 @@ import {
   Cpu,
   Calendar,
   FolderOpen,
+  ChevronRight,
 } from 'lucide-react';
 import type { AppSettings, AppInfo, UpdateStatus } from '../types';
 import { useToastStore } from '../store/toastStore';

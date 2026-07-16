@@ -8,18 +8,56 @@ const ICONS: Record<ToastType['type'], typeof CheckCircle> = {
   info: Info,
 };
 
-const STYLES: Record<ToastType['type'], string> = {
-  success: 'border-l-green-500 bg-green-500/10',
-  error: 'border-l-red-500 bg-red-500/10',
-  warning: 'border-l-yellow-500 bg-yellow-500/10',
-  info: 'border-l-blue-500 bg-blue-500/10',
-};
-
-const ICON_COLORS: Record<ToastType['type'], string> = {
-  success: 'text-green-400',
-  error: 'text-red-400',
-  warning: 'text-yellow-400',
-  info: 'text-blue-400',
+const TOAST_THEME: Record<ToastType['type'], {
+  border: string;
+  bg: string;
+  iconBg: string;
+  iconColor: string;
+  glow: string;
+  titleColor: string;
+  msgColor: string;
+  progressColor: string;
+}> = {
+  success: {
+    border: 'rgba(34, 197, 94, 0.3)',
+    bg: 'linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(22, 163, 74, 0.04) 100%)',
+    iconBg: 'rgba(34, 197, 94, 0.15)',
+    iconColor: '#4ade80',
+    glow: '0 0 20px rgba(34, 197, 94, 0.1)',
+    titleColor: '#e5e7eb',
+    msgColor: '#9ca3af',
+    progressColor: '#22c55e',
+  },
+  error: {
+    border: 'rgba(239, 68, 68, 0.3)',
+    bg: 'linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(220, 38, 38, 0.04) 100%)',
+    iconBg: 'rgba(239, 68, 68, 0.15)',
+    iconColor: '#f87171',
+    glow: '0 0 20px rgba(239, 68, 68, 0.1)',
+    titleColor: '#e5e7eb',
+    msgColor: '#9ca3af',
+    progressColor: '#ef4444',
+  },
+  warning: {
+    border: 'rgba(245, 158, 11, 0.3)',
+    bg: 'linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(217, 119, 6, 0.04) 100%)',
+    iconBg: 'rgba(245, 158, 11, 0.15)',
+    iconColor: '#fbbf24',
+    glow: '0 0 20px rgba(245, 158, 11, 0.1)',
+    titleColor: '#e5e7eb',
+    msgColor: '#9ca3af',
+    progressColor: '#f59e0b',
+  },
+  info: {
+    border: 'rgba(59, 130, 246, 0.3)',
+    bg: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(37, 99, 235, 0.04) 100%)',
+    iconBg: 'rgba(59, 130, 246, 0.15)',
+    iconColor: '#60a5fa',
+    glow: '0 0 20px rgba(59, 130, 246, 0.1)',
+    titleColor: '#e5e7eb',
+    msgColor: '#9ca3af',
+    progressColor: '#3b82f6',
+  },
 };
 
 interface Props {
@@ -29,22 +67,62 @@ interface Props {
 export default function Toast({ toast }: Props) {
   const removeToast = useToastStore((s) => s.removeToast);
   const Icon = ICONS[toast.type];
+  const theme = TOAST_THEME[toast.type];
 
   return (
     <div
-      className={`flex items-start gap-3 px-4 py-3 rounded-lg border-l-4 border border-[#1E2128] shadow-lg backdrop-blur-sm ${STYLES[toast.type]}`}
-      style={{ minWidth: '300px', maxWidth: '420px' }}
+      style={{
+        background: theme.bg,
+        border: `1px solid ${theme.border}`,
+        borderLeft: `3px solid ${theme.progressColor}`,
+        boxShadow: `0 8px 32px rgba(0, 0, 0, 0.3), ${theme.glow}, inset 0 1px 0 rgba(255, 255, 255, 0.03)`,
+        backdropFilter: 'blur(20px) saturate(180%)',
+        minWidth: 320,
+        maxWidth: 420,
+        borderRadius: 14,
+        animation: 'toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+      }}
+      className="flex items-start gap-3 px-4 py-3.5"
     >
-      <Icon size={18} className={`mt-0.5 shrink-0 ${ICON_COLORS[toast.type]}`} />
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-[#E5E7EB]">{toast.title}</p>
+      {/* Icon */}
+      <div
+        style={{
+          background: theme.iconBg,
+          borderRadius: 10,
+          width: 34,
+          height: 34,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+        }}
+      >
+        <Icon size={18} style={{ color: theme.iconColor }} />
+      </div>
+
+      {/* Text */}
+      <div className="flex-1 min-w-0 pt-0.5">
+        <p style={{ fontSize: 13.5, fontWeight: 600, color: theme.titleColor, lineHeight: 1.3 }}>
+          {toast.title}
+        </p>
         {toast.message && (
-          <p className="text-xs text-[#9CA3AF] mt-0.5">{toast.message}</p>
+          <p style={{ fontSize: 12.5, color: theme.msgColor, marginTop: 3, lineHeight: 1.45 }}>
+            {toast.message}
+          </p>
         )}
       </div>
+
+      {/* Close button */}
       <button
         onClick={() => removeToast(toast.id)}
-        className="text-[#6B7280] hover:text-[#E5E7EB] transition-colors shrink-0"
+        style={{
+          color: '#6b7280',
+          transition: 'color 0.15s',
+          flexShrink: 0,
+          marginTop: 1,
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.color = '#d1d5db')}
+        onMouseLeave={(e) => (e.currentTarget.style.color = '#6b7280')}
       >
         <X size={14} />
       </button>
