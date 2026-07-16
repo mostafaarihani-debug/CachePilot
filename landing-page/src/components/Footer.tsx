@@ -89,7 +89,7 @@ export function Footer() {
           }}
         >
           <a
-            href="https://github.com/mostafaarihani-debug/CachePilot/releases/latest"
+            href="https://github.com/mostafaarihani-debug/CachePilot/releases/download/v1.1.7/CachePilot-Setup-1.1.7.exe"
             className="btn-primary"
             style={{ fontSize: 16, padding: '18px 36px' }}
           >
@@ -130,21 +130,7 @@ export function Footer() {
           gap: 16,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{
-              width: 28,
-              height: 28,
-              borderRadius: 8,
-              background: 'linear-gradient(135deg, #4DA3FF, #2B8AFF)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 14,
-              fontWeight: 800,
-              color: 'white',
-              fontFamily: 'var(--font-display)',
-            }}>
-              C
-            </div>
+            <img src="/logo.png" alt="CachePilot" style={{ width: 28, height: 28, borderRadius: 8 }} />
             <span style={{
               fontSize: 14,
               fontWeight: 600,
@@ -156,6 +142,22 @@ export function Footer() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+            <a
+              href="#terms"
+              style={{ fontSize: 13, color: '#5A6478', textDecoration: 'none', transition: 'color 0.2s' }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#E8EDF5')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#5A6478')}
+            >
+              Terms
+            </a>
+            <a
+              href="#privacy"
+              style={{ fontSize: 13, color: '#5A6478', textDecoration: 'none', transition: 'color 0.2s' }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#E8EDF5')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#5A6478')}
+            >
+              Privacy
+            </a>
             <a
               href="https://github.com/mostafaarihani-debug/CachePilot"
               style={{ color: '#5A6478', transition: 'color 0.2s' }}

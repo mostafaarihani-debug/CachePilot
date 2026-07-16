@@ -307,7 +307,7 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.3 }}
             style={{ display: 'flex', gap: 12, marginTop: 32, flexWrap: 'wrap' }}
           >
-            <a href="#download" className="btn-primary" style={{ fontSize: 16, padding: '16px 32px' }}>
+            <a href="https://github.com/mostafaarihani-debug/CachePilot/releases/download/v1.1.7/CachePilot-Setup-1.1.7.exe" className="btn-primary" style={{ fontSize: 16, padding: '16px 32px' }}>
               <Download style={{ width: 18, height: 18 }} />
               Download Free
             </a>

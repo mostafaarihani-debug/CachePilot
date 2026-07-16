@@ -37,21 +37,7 @@ export function Navbar() {
     >
       <div style={{ width: '100%', maxWidth: 1200, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <a href="#" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <div style={{
-            width: 36,
-            height: 36,
-            borderRadius: 10,
-            background: 'linear-gradient(135deg, #4DA3FF, #2B8AFF)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 18,
-            fontWeight: 800,
-            color: 'white',
-            fontFamily: 'var(--font-display)',
-          }}>
-            C
-          </div>
+          <img src="/logo.png" alt="CachePilot" style={{ width: 36, height: 36, borderRadius: 10 }} />
           <span style={{
             fontSize: 20,
             fontWeight: 700,
@@ -81,7 +67,7 @@ export function Navbar() {
             </a>
           ))}
           <a
-            href="#download"
+            href="https://github.com/mostafaarihani-debug/CachePilot/releases/download/v1.1.7/CachePilot-Setup-1.1.7.exe"
             className="btn-primary"
             style={{ padding: '10px 20px', fontSize: 14 }}
           >
