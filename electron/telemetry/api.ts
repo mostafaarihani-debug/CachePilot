@@ -1,7 +1,7 @@
 import type { TelemetryEvent } from './types';
 import log from '../main/logger';
 
-const API_BASE_URL = 'https://api.cachepilot.app';
+const API_BASE_URL = 'https://cachepilot-api.admorandom.workers.dev';
 const BATCH_SIZE = 50;
 const REQUEST_TIMEOUT = 10000;
 

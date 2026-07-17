@@ -121,7 +121,12 @@ async function updateDailyStats(db: D1Database, event: Record<string, unknown>):
 }
 
 async function handleEvents(request: Request, env: Env): Promise<Response> {
-  const body = await request.json<EventBody>();
+  let body: EventBody;
+  try {
+    body = await request.json<EventBody>();
+  } catch (e) {
+    return json({ error: 'Invalid JSON', detail: String(e) }, 400);
+  }
   
   if (!body.events || !Array.isArray(body.events) || body.events.length === 0) {
     return json({ error: 'Invalid request: events array required' }, 400);
@@ -147,6 +152,7 @@ async function handleEvents(request: Request, env: Env): Promise<Response> {
     }
     
     try {
+      const props = event.properties ? JSON.stringify(event.properties) : null;
       await env.DB.prepare(
         'INSERT INTO events (event, device_id, timestamp, app_version, os_version, os_build, arch, '
         + 'screen_width, screen_height, language, timezone, properties) '
@@ -163,13 +169,13 @@ async function handleEvents(request: Request, env: Env): Promise<Response> {
         event.screen_height as number,
         event.language as string,
         event.timezone as string,
-        event.properties ? JSON.stringify(event.properties) : null,
+        props,
       ).run();
       
       await upsertDevice(env.DB, event);
       await updateDailyStats(env.DB, event);
       accepted++;
-    } catch {
+    } catch (err) {
       failed++;
     }
   }
@@ -241,7 +247,7 @@ async function handleDashboard(request: Request, env: Env): Promise<Response> {
     db.prepare('SELECT os_version, COUNT(*) as count FROM devices GROUP BY os_version ORDER BY count DESC').all<{ os_version: string; count: number }>(),
     db.prepare('SELECT * FROM crashes ORDER BY created_at DESC LIMIT 10').all<Record<string, unknown>>(),
     db.prepare('SELECT date, SUM(value) as count FROM daily_stats WHERE metric = \'installs\' AND date >= ? GROUP BY date ORDER BY date').bind(since).all<{ date: string; count: number }>(),
-    db.prepare('SELECT date, COUNT(DISTINCT device_id) as count FROM events WHERE event = \'launch\' AND date >= ? GROUP BY date ORDER BY date').bind(since).all<{ date: string; count: number }>(),
+    db.prepare('SELECT DATE(timestamp) as date, COUNT(DISTINCT device_id) as count FROM events WHERE event = \'launch\' AND timestamp >= ? GROUP BY DATE(timestamp) ORDER BY DATE(timestamp)').bind(since).all<{ date: string; count: number }>(),
   ]);
   
   const totalInstalls = totalDevices?.count ?? 0;

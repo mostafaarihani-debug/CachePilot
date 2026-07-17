@@ -1,4 +1,4 @@
-const API_BASE = 'https://api.cachepilot.app';
+const API_BASE = 'https://cachepilot-api.admorandom.workers.dev';
 
 export interface DashboardData {
   live_users: number;
