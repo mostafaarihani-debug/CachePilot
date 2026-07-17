@@ -44,4 +44,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   checkScanLimit: () => ipcRenderer.invoke('check-scan-limit'),
   onLicenseStatus: (callback: (status: unknown) => void) =>
     createListener('license-status', (status: unknown) => callback(status)),
+  getTelemetryConsent: () => ipcRenderer.invoke('get-telemetry-consent'),
+  setTelemetryConsent: (consent: 'yes' | 'no') => ipcRenderer.invoke('set-telemetry-consent', consent),
+  getTelemetryQueueSize: () => ipcRenderer.invoke('get-telemetry-queue-size'),
 });

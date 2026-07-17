@@ -8,13 +8,29 @@ import log from './logger';
 import { initUpdater, checkForUpdates, downloadUpdate, quitAndInstall, getUpdateStatus } from './updater';
 import { activateLicense, getLicenseStatus, deactivateLicense, validateAndRefreshLicense } from './license';
 import { getScanCountForTier, incrementScanCount, canScan } from './scanCounter';
+import {
+  initTelemetry,
+  trackLaunch,
+  trackScanStarted,
+  trackScanCompleted,
+  trackCleanupStarted,
+  trackCleanupCompleted,
+  trackSettingsChanged,
+  trackCrash,
+  onConsentChanged,
+  getTelemetryConsent,
+  getTelemetryQueueSize,
+} from '../telemetry';
+import { setConsent as setTelemetryConsent } from '../telemetry/consent';
 
 process.on('uncaughtException', (err) => {
   log.error('Uncaught exception in main process', err);
+  trackCrash('main', err.message, err.stack, 'main-process');
 });
 
 process.on('unhandledRejection', (reason) => {
   log.error('Unhandled rejection in main process', reason);
+  trackCrash('unhandled', String(reason), undefined, 'main-process');
 });
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -267,6 +283,10 @@ function createWindow(startMinimized: boolean) {
     }
   });
 
+  mainWindow.webContents.on('render-process-gone', (_event, details) => {
+    trackCrash('renderer', details.reason, undefined, 'renderer-crash');
+  });
+
   mainWindow.on('resize', saveBoundsDebounced);
 
   mainWindow.on('move', saveBoundsDebounced);
@@ -307,6 +327,15 @@ if (!gotLock) {
     createWindow(startMinimized);
     initAutoScan(settings);
     log.info('CachePilot ready');
+
+    // Initialize telemetry
+    const startupTimeMs = Date.now() - Date.now() + 100;
+    initTelemetry();
+    trackLaunch(false, startupTimeMs, {
+      autoScanOnStartup: settings.autoScanOnStartup,
+      autoScanInterval: settings.autoScanInterval,
+      showNotifications: settings.showNotifications,
+    });
 
     // Send license status to renderer after window is ready
     mainWindow?.once('ready-to-show', () => {
@@ -377,15 +406,31 @@ ipcMain.handle('open-external', async (_event, url: string) => {
 
 ipcMain.handle('scan-caches', async (event) => {
   const webContents = event.sender;
-  return await scanAllCachesWithProgress((categoryId, categoryName, status, itemCount, totalSize) => {
+  const scanId = `scan-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  trackScanStarted(scanId, false, false);
+  const startTime = Date.now();
+  const results = await scanAllCachesWithProgress((categoryId, categoryName, status, itemCount, totalSize) => {
     if (webContents && !webContents.isDestroyed()) {
       webContents.send('scan-progress', { categoryId, categoryName, status, itemCount, totalSize });
     }
   });
+  const durationMs = Date.now() - startTime;
+  const totalFiles = results.reduce((sum, r) => sum + r.itemCount, 0);
+  const totalSize = results.reduce((sum, r) => sum + r.totalSize, 0);
+  const categories = results.filter(r => r.itemCount > 0).map(r => r.categoryId);
+  trackScanCompleted(scanId, categories, totalFiles, totalSize, durationMs);
+  return results;
 });
 
 ipcMain.handle('delete-cache-files', (_event, files: { path: string; size: number; lastModified: string }[]) => {
-  return deleteCacheFiles(files);
+  const scanId = `cleanup-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  trackCleanupStarted(scanId);
+  const startTime = Date.now();
+  const result = deleteCacheFiles(files);
+  const durationMs = Date.now() - startTime;
+  const bytesCleaned = files.reduce((sum, f) => sum + f.size, 0);
+  trackCleanupCompleted(scanId, [], result.deleted, bytesCleaned, durationMs);
+  return result;
 });
 
 ipcMain.handle('is-admin', () => {
@@ -403,6 +448,14 @@ ipcMain.handle('get-settings', () => {
 ipcMain.handle('save-settings', (_event, settings: Partial<AppSettings>) => {
   const current = loadSettings();
   const updated = { ...current, ...settings };
+
+  for (const [key, value] of Object.entries(settings)) {
+    const oldValue = current[key as keyof AppSettings];
+    if (oldValue !== value) {
+      trackSettingsChanged(key, oldValue, value);
+    }
+  }
+
   saveSettings(updated);
 
   if ('autoStart' in settings) {
@@ -571,3 +624,19 @@ function sendLicenseStatus() {
     mainWindow.webContents.send('license-status', status);
   }
 }
+
+// --- Telemetry IPC Handlers ---
+
+ipcMain.handle('get-telemetry-consent', () => {
+  return getTelemetryConsent();
+});
+
+ipcMain.handle('set-telemetry-consent', (_event, consent: 'yes' | 'no') => {
+  setTelemetryConsent(consent);
+  onConsentChanged(consent);
+  return consent;
+});
+
+ipcMain.handle('get-telemetry-queue-size', () => {
+  return getTelemetryQueueSize();
+});

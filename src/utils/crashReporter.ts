@@ -13,6 +13,10 @@ export function initCrashReporter() {
       stack: event.error?.stack,
       timestamp: new Date().toISOString(),
     });
+
+    if (window.electronAPI) {
+      window.electronAPI.getTelemetryQueueSize?.().catch(() => {});
+    }
   });
 
   window.addEventListener('unhandledrejection', (event) => {

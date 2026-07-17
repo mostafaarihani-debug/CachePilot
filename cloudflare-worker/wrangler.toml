@@ -1,0 +1,17 @@
+name = "cachepilot-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[vars]
+API_KEY = "cp-dashboard-key-change-me"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "cachepilot-telemetry"
+database_id = "placeholder-replace-with-real-id"
+
+[env.production]
+vars = { API_KEY = "cp-production-key-change-me" }
+
+[env.staging]
+vars = { API_KEY = "cp-staging-key-change-me" }

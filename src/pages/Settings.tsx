@@ -18,6 +18,8 @@ import {
   Calendar,
   FolderOpen,
   ChevronRight,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import type { AppSettings, AppInfo, UpdateStatus } from '../types';
 import { useToastStore } from '../store/toastStore';
@@ -83,6 +85,7 @@ export function Settings() {
   const [appInfo, setAppInfo] = useState<AppInfo | null>(null);
   const [updateStatus, setUpdateStatus] = useState<UpdateStatus>({ status: 'idle' });
   const [isTaskScheduled, setIsTaskScheduled] = useState(false);
+  const [telemetryConsent, setTelemetryConsent] = useState<'yes' | 'no' | 'unset'>('unset');
   const addToast = useToastStore((s) => s.addToast);
 
   useEffect(() => {
@@ -92,6 +95,7 @@ export function Settings() {
     api.getAppInfo().then(setAppInfo).catch(() => {});
     api.getUpdateStatus().then(setUpdateStatus).catch(() => {});
     api.getScheduledScan().then(setIsTaskScheduled).catch(() => {});
+    api.getTelemetryConsent().then(setTelemetryConsent).catch(() => {});
 
     const cleanup = api.onUpdateStatus((status: UpdateStatus) => {
       setUpdateStatus(status);
@@ -645,6 +649,90 @@ export function Settings() {
 
           {/* Right Column - Info Cards */}
           <div className="space-y-6">
+            {/* Privacy Card */}
+            <div
+              style={{
+                borderRadius: 16,
+                border: '1px solid rgb(43, 52, 65)',
+                background: 'linear-gradient(135deg, rgb(21, 26, 33) 0%, rgb(18, 22, 28) 100%)',
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  padding: '20px 24px',
+                  borderBottom: '1px solid rgb(43, 52, 65)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                }}
+              >
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    background: 'rgba(168, 130, 255, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Eye className="w-4.5 h-4.5" style={{ color: 'rgb(168, 130, 255)' }} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: 15, fontWeight: 600, color: 'rgb(232, 237, 245)' }}>Privacy</h3>
+                  <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)' }}>Anonymous usage data</p>
+                </div>
+              </div>
+
+              <div style={{ padding: '14px 24px' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(168, 130, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {telemetryConsent === 'yes' ? (
+                        <Eye className="w-4 h-4" style={{ color: 'rgb(168, 130, 255)' }} />
+                      ) : (
+                        <EyeOff className="w-4 h-4" style={{ color: 'rgb(116, 130, 148)' }} />
+                      )}
+                    </div>
+                    <div>
+                      <p style={{ fontSize: 14, color: 'rgb(232, 237, 245)', fontWeight: 500 }}>Anonymous telemetry</p>
+                      <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)', marginTop: 1 }}>
+                        {telemetryConsent === 'yes' ? 'Sending anonymous usage data' : 'Not sending any data'}
+                      </p>
+                    </div>
+                  </div>
+                  <Toggle
+                    enabled={telemetryConsent === 'yes'}
+                    onToggle={() => {
+                      const newValue = telemetryConsent === 'yes' ? 'no' : 'yes';
+                      window.electronAPI?.setTelemetryConsent(newValue);
+                      setTelemetryConsent(newValue);
+                      addToast({
+                        type: 'info',
+                        title: 'Privacy Updated',
+                        message: newValue === 'yes' ? 'Anonymous telemetry enabled' : 'Telemetry disabled',
+                      });
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginTop: 12, padding: '10px 12px', borderRadius: 8, background: 'rgba(168, 130, 255, 0.05)', border: '1px solid rgba(168, 130, 255, 0.1)' }}>
+                  <p style={{ fontSize: 11, color: 'rgb(116, 130, 148)', lineHeight: 1.5 }}>
+                    We collect only anonymous usage patterns, crash reports, and performance metrics. 
+                    We never collect file names, personal data, or any identifying information.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* About Card */}
             <div
               style={{

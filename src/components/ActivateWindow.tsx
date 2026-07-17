@@ -1,14 +1,11 @@
 import { useState } from 'react';
 import { Key, Crown, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
-import { useAppStore } from '../store';
-import type { LicenseStatus } from '../types';
 
 export function ActivateWindow({ onComplete }: { onComplete: () => void }) {
   const [licenseKey, setLicenseKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const setLicenseStatus = useAppStore((s) => s.setLicenseStatus);
 
   const handleActivate = async () => {
     if (!licenseKey.trim() || !window.electronAPI) return;
@@ -21,7 +18,6 @@ export function ActivateWindow({ onComplete }: { onComplete: () => void }) {
       const result = await window.electronAPI.activateLicense(licenseKey.trim());
       if (result.success) {
         setSuccess(true);
-        setLicenseStatus(result.status);
         setTimeout(() => onComplete(), 1500);
       } else {
         setError(result.error || 'Invalid license key. Please check and try again.');
@@ -34,8 +30,6 @@ export function ActivateWindow({ onComplete }: { onComplete: () => void }) {
   };
 
   const handleContinueFree = () => {
-    const freeStatus: LicenseStatus = { tier: 'free', isValid: false };
-    setLicenseStatus(freeStatus);
     localStorage.setItem('licenseSkipped', 'true');
     onComplete();
   };

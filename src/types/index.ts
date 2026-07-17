@@ -172,6 +172,9 @@ export interface ElectronAPI {
   getScanCount: () => Promise<ScanCountInfo>;
   checkScanLimit: () => Promise<ScanCountInfo>;
   onLicenseStatus: (callback: (status: LicenseStatus) => void) => () => void;
+  getTelemetryConsent: () => Promise<'yes' | 'no' | 'unset'>;
+  setTelemetryConsent: (consent: 'yes' | 'no') => Promise<'yes' | 'no'>;
+  getTelemetryQueueSize: () => Promise<number>;
 }
 
 declare global {

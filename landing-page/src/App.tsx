@@ -7,6 +7,7 @@ import { HowItWorks } from './components/HowItWorks';
 import { Pricing } from './components/Pricing';
 import { Footer } from './components/Footer';
 import { Legal } from './components/Legal';
+import { Admin } from './pages/Admin';
 
 export default function App() {
   const [hash, setHash] = useState(window.location.hash.replace('#', ''));
@@ -16,6 +17,10 @@ export default function App() {
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
+
+  if (hash === 'admin') {
+    return <Admin />;
+  }
 
   const isLegalPage = hash === 'terms' || hash === 'privacy';
 

@@ -9,6 +9,7 @@ import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { WelcomeWizard, hasCompletedWizard } from './components/WelcomeWizard';
 import { initCrashReporter } from './utils/crashReporter';
 import { DashboardSkeleton } from './components/Skeleton';
+import { ConsentDialog } from './components/ConsentDialog';
 
 const Dashboard = lazy(() => import('./pages/Dashboard').then((m) => ({ default: m.Dashboard })));
 const ScanResults = lazy(() => import('./pages/ScanResults').then((m) => ({ default: m.ScanResults })));
@@ -132,6 +133,7 @@ function AppContent() {
   return (
     <>
       {showWizard && <WelcomeWizard onComplete={() => setShowWizard(false)} />}
+      <ConsentDialog onConsent={() => {}} />
       <div className="dark h-screen w-screen flex overflow-hidden" style={{ background: 'rgb(15, 17, 21)', color: 'rgb(232, 237, 245)' }}>
         <Sidebar />
         <main className="flex-1 flex flex-col overflow-hidden">
