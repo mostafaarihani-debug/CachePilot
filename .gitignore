@@ -10,3 +10,5 @@ Thumbs.db
 skills-lock.json
 the-book-of-secret-knowledge/
 .agents/
+
+cloudflare-worker/.wrangler/
