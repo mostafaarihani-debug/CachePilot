@@ -66,7 +66,7 @@ export function Navbar() {
             </a>
           ))}
           <a
-            href="https://github.com/mostafaarihani-debug/CachePilot/releases/download/v1.1.8/CachePilot-Setup-1.1.8.exe"
+            href="https://github.com/mostafaarihani-debug/CachePilot/releases/download/v1.1.9/CachePilot-Setup-1.1.9.exe"
             className="btn-primary"
             style={{ padding: '10px 20px', fontSize: 14 }}
           >
