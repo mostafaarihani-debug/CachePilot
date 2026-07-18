@@ -130,7 +130,7 @@ export function Footer() {
           gap: 16,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <img src="/logo.png" alt="CachePilot" style={{ width: 28, height: 28, borderRadius: 8 }} />
+            <img src="/CachePilot/logo.png" alt="CachePilot" style={{ width: 28, height: 28, borderRadius: 8 }} />
             <span style={{
               fontSize: 14,
               fontWeight: 600,

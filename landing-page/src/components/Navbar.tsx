@@ -36,7 +36,7 @@ export function Navbar() {
     >
       <div style={{ width: '100%', maxWidth: 1200, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <a href="#" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <img src="/logo.png" alt="CachePilot" style={{ width: 36, height: 36, borderRadius: 10 }} />
+          <img src="/CachePilot/logo.png" alt="CachePilot" style={{ width: 36, height: 36, borderRadius: 10 }} />
           <span style={{
             fontSize: 20,
             fontWeight: 700,
