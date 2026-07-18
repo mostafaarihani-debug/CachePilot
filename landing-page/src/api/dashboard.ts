@@ -32,3 +32,27 @@ export async function fetchStats(): Promise<{ status: string; message: string }>
   const response = await fetch(`${API_BASE}/api/v1/stats`);
   return response.json();
 }
+
+export interface FeedbackItem {
+  id: number;
+  name: string | null;
+  email: string | null;
+  category: string;
+  message: string;
+  app_version: string | null;
+  os_version: string | null;
+  created_at: string;
+}
+
+export async function fetchFeedback(apiKey: string): Promise<FeedbackItem[]> {
+  const response = await fetch(`${API_BASE}/api/v1/feedback`, {
+    headers: { 'X-API-Key': apiKey },
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Feedback fetch failed: ${response.status}`);
+  }
+  
+  const data = await response.json();
+  return data.feedbacks || [];
+}

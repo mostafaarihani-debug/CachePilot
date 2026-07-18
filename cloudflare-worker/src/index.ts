@@ -360,6 +360,14 @@ async function handleStats(): Promise<Response> {
   });
 }
 
+async function handleGetFeedback(env: Env): Promise<Response> {
+  const result = await env.DB.prepare(
+    'SELECT id, name, email, category, message, app_version, os_version, created_at FROM feedback ORDER BY created_at DESC LIMIT 100'
+  ).all<Record<string, unknown>>();
+  
+  return json({ feedbacks: result?.results ?? [] });
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     if (request.method === 'OPTIONS') {
@@ -384,6 +392,14 @@ export default {
       
       if (path === '/api/v1/feedback' && request.method === 'POST') {
         return await handleFeedback(request, env);
+      }
+      
+      if (path === '/api/v1/feedback' && request.method === 'GET') {
+        const apiKey = request.headers.get('X-API-Key');
+        if (apiKey !== env.API_KEY) {
+          return json({ error: 'Unauthorized' }, 401);
+        }
+        return await handleGetFeedback(env);
       }
       
       if (path === '/api/v1/dashboard' && request.method === 'GET') {

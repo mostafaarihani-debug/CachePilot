@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useDashboard } from '../hooks/useDashboard';
-import { Shield, Download, Users, Activity, AlertTriangle, RefreshCw, BarChart3, Cpu, Globe } from 'lucide-react';
+import { fetchFeedback, type FeedbackItem } from '../api/dashboard';
+import { Shield, Download, Users, Activity, AlertTriangle, RefreshCw, BarChart3, Cpu, Globe, MessageSquare } from 'lucide-react';
 
 function StatCard({ icon: Icon, label, value, color }: { icon: React.ElementType; label: string; value: string | number; color: string }) {
   return (
@@ -67,11 +68,39 @@ function PieLegend({ items }: { items: { label: string; count: number; percentag
 
 const VERSION_COLORS = ['#3b82f6', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#6366f1'];
 
+const CATEGORY_BADGES: Record<string, { color: string; bg: string }> = {
+  bug: { color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)' },
+  feature: { color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)' },
+  improvement: { color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' },
+  other: { color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.1)' },
+};
+
 export function Admin() {
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('cp_admin_key') || '');
   const [inputKey, setInputKey] = useState(apiKey);
   const [range, setRange] = useState('7d');
   const { data, loading, error, refresh } = useDashboard(apiKey || null, range);
+  const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
+
+  const loadFeedback = useCallback(async () => {
+    if (!apiKey) return;
+    setFeedbackLoading(true);
+    try {
+      const items = await fetchFeedback(apiKey);
+      setFeedbacks(items);
+    } catch {
+      // silently fail — feedback is non-critical
+    } finally {
+      setFeedbackLoading(false);
+    }
+  }, [apiKey]);
+
+  useEffect(() => {
+    loadFeedback();
+    const interval = setInterval(loadFeedback, 30000);
+    return () => clearInterval(interval);
+  }, [loadFeedback]);
 
   const handleLogin = () => {
     localStorage.setItem('cp_admin_key', inputKey);
@@ -178,7 +207,7 @@ export function Admin() {
               <option value="90d">Last 90 days</option>
             </select>
             <button
-              onClick={refresh}
+              onClick={() => { refresh(); loadFeedback(); }}
               disabled={loading}
               style={{
                 padding: '8px 12px',
@@ -351,6 +380,7 @@ export function Admin() {
                 border: '1px solid rgb(43, 52, 65)',
                 borderRadius: 16,
                 overflow: 'hidden',
+                marginBottom: 24,
               }}>
                 <div style={{
                   padding: '16px 24px',
@@ -390,6 +420,116 @@ export function Admin() {
                 </div>
               </div>
             )}
+
+            <div style={{
+              background: 'linear-gradient(135deg, rgb(21, 26, 33) 0%, rgb(18, 22, 28) 100%)',
+              border: '1px solid rgb(43, 52, 65)',
+              borderRadius: 16,
+              overflow: 'hidden',
+            }}>
+              <div style={{
+                padding: '16px 24px',
+                borderBottom: '1px solid rgb(43, 52, 65)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <MessageSquare size={18} style={{ color: 'rgb(168, 130, 255)' }} />
+                  <span style={{ fontSize: 14, fontWeight: 600, color: 'rgb(232, 237, 245)' }}>
+                    User Feedback
+                  </span>
+                  <span style={{
+                    fontSize: 11,
+                    color: 'rgb(116, 130, 148)',
+                    background: 'rgb(15, 17, 21)',
+                    padding: '2px 8px',
+                    borderRadius: 6,
+                  }}>
+                    {feedbacks.length}
+                  </span>
+                </div>
+                <button
+                  onClick={loadFeedback}
+                  disabled={feedbackLoading}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: 6,
+                    border: '1px solid rgb(43, 52, 65)',
+                    background: 'rgb(15, 17, 21)',
+                    color: 'rgb(116, 130, 148)',
+                    fontSize: 12,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                  }}
+                >
+                  <RefreshCw size={12} className={feedbackLoading ? 'animate-spin' : ''} />
+                  Refresh
+                </button>
+              </div>
+              {feedbacks.length === 0 ? (
+                <div style={{ padding: 48, textAlign: 'center', color: 'rgb(116, 130, 148)', fontSize: 13 }}>
+                  {feedbackLoading ? 'Loading feedback...' : 'No feedback yet'}
+                </div>
+              ) : (
+                <div style={{ maxHeight: 400, overflow: 'auto' }}>
+                  {feedbacks.map((fb) => {
+                    const badge = CATEGORY_BADGES[fb.category] || CATEGORY_BADGES.other;
+                    return (
+                      <div
+                        key={fb.id}
+                        style={{
+                          padding: '14px 24px',
+                          borderBottom: '1px solid rgb(43, 52, 65)',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                          <span style={{
+                            fontSize: 11,
+                            fontWeight: 600,
+                            color: badge.color,
+                            background: badge.bg,
+                            padding: '2px 8px',
+                            borderRadius: 6,
+                            textTransform: 'capitalize',
+                          }}>
+                            {fb.category}
+                          </span>
+                          {fb.name && (
+                            <span style={{ fontSize: 12, color: 'rgb(232, 237, 245)', fontWeight: 500 }}>
+                              {fb.name}
+                            </span>
+                          )}
+                          {fb.email && (
+                            <span style={{ fontSize: 11, color: 'rgb(116, 130, 148)' }}>
+                              {fb.email}
+                            </span>
+                          )}
+                          <span style={{ fontSize: 11, color: 'rgb(116, 130, 148)', marginLeft: 'auto' }}>
+                            {fb.created_at?.slice(0, 16).replace('T', ' ')}
+                          </span>
+                        </div>
+                        <p style={{ fontSize: 13, color: 'rgb(190, 200, 215)', margin: 0, lineHeight: 1.5 }}>
+                          {fb.message}
+                        </p>
+                        {(fb.app_version || fb.os_version) && (
+                          <div style={{ display: 'flex', gap: 12, marginTop: 6 }}>
+                            {fb.app_version && (
+                              <span style={{ fontSize: 11, color: 'rgb(116, 130, 148)' }}>v{fb.app_version}</span>
+                            )}
+                            {fb.os_version && (
+                              <span style={{ fontSize: 11, color: 'rgb(116, 130, 148)' }}>{fb.os_version}</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </>
         )}
 
