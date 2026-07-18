@@ -8,6 +8,7 @@ import { Pricing } from './components/Pricing';
 import { Footer } from './components/Footer';
 import { Legal } from './components/Legal';
 import { Admin } from './pages/Admin';
+import { Feedback } from './components/Feedback';
 
 export default function App() {
   const [hash, setHash] = useState(window.location.hash.replace('#', ''));
@@ -20,6 +21,18 @@ export default function App() {
 
   if (hash === 'admin') {
     return <Admin />;
+  }
+
+  if (hash === 'feedback') {
+    return (
+      <div style={{ minHeight: '100vh', background: '#0b0d11' }}>
+        <Navbar />
+        <div style={{ paddingTop: 120, paddingBottom: 80, paddingInline: 24 }}>
+          <Feedback />
+        </div>
+        <Footer />
+      </div>
+    );
   }
 
   const isLegalPage = hash === 'terms' || hash === 'privacy';

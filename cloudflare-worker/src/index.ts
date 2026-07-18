@@ -29,6 +29,15 @@ interface UninstallBody {
   last_active: string;
 }
 
+interface FeedbackBody {
+  name?: string;
+  email?: string;
+  category: string;
+  message: string;
+  app_version?: string;
+  os_version?: string;
+}
+
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -40,6 +49,66 @@ function json(data: unknown, status = 200): Response {
     status,
     headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
   });
+}
+
+function sanitizeInput(input: string, maxLength: number): string {
+  return input
+    .replace(/[<>]/g, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+\s*=/gi, '')
+    .replace(/data:/gi, '')
+    .trim()
+    .slice(0, maxLength);
+}
+
+const VALID_CATEGORIES = ['bug', 'feature', 'improvement', 'other'];
+
+function validateEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+async function handleFeedback(request: Request, env: Env): Promise<Response> {
+  let body: FeedbackBody;
+  try {
+    body = await request.json<FeedbackBody>();
+  } catch {
+    return json({ error: 'Invalid JSON' }, 400);
+  }
+
+  if (!body.category || !VALID_CATEGORIES.includes(body.category)) {
+    return json({ error: 'Invalid category' }, 400);
+  }
+
+  if (!body.message || typeof body.message !== 'string' || body.message.trim().length < 10) {
+    return json({ error: 'Message must be at least 10 characters' }, 400);
+  }
+
+  const category = sanitizeInput(body.category, 50);
+  const message = sanitizeInput(body.message, 2000);
+  const name = body.name ? sanitizeInput(body.name, 100) : null;
+  const email = body.email ? sanitizeInput(body.email, 254) : null;
+
+  if (email && !validateEmail(email)) {
+    return json({ error: 'Invalid email format' }, 400);
+  }
+
+  if (name && name.length < 1) {
+    return json({ error: 'Invalid name' }, 400);
+  }
+
+  await env.DB.prepare(
+    'INSERT INTO feedback (name, email, category, message, app_version, os_version) '
+    + 'VALUES (?, ?, ?, ?, ?, ?)'
+  ).bind(
+    name || null,
+    email || null,
+    category,
+    message,
+    body.app_version ? sanitizeInput(body.app_version, 20) : null,
+    body.os_version ? sanitizeInput(body.os_version, 50) : null,
+  ).run();
+
+  return json({ ok: true, message: 'Thank you for your feedback!' });
 }
 
 function validateEvent(event: Record<string, unknown>): boolean {
@@ -311,6 +380,10 @@ export default {
       
       if (path === '/api/v1/uninstall' && request.method === 'POST') {
         return await handleUninstall(request, env);
+      }
+      
+      if (path === '/api/v1/feedback' && request.method === 'POST') {
+        return await handleFeedback(request, env);
       }
       
       if (path === '/api/v1/dashboard' && request.method === 'GET') {

@@ -20,6 +20,7 @@ import {
   ChevronRight,
   Eye,
   EyeOff,
+  MessageSquare,
 } from 'lucide-react';
 import type { AppSettings, AppInfo, UpdateStatus } from '../types';
 import { useToastStore } from '../store/toastStore';
@@ -859,6 +860,41 @@ export function Settings() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <FolderOpen className="w-4 h-4" style={{ color: 'rgb(116, 130, 148)' }} />
                     <span>Open Logs Folder</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4" style={{ color: 'rgb(116, 130, 148)' }} />
+                </button>
+
+                <div style={{ height: 1, background: 'rgb(43, 52, 65)', margin: '8px 0' }} />
+
+                <button
+                  onClick={() => window.electronAPI?.openExternal('https://mostafaarihani-debug.github.io/CachePilot/#feedback')}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    borderRadius: 10,
+                    border: '1px solid rgb(43, 52, 65)',
+                    background: 'rgb(15, 17, 21)',
+                    color: 'rgb(232, 237, 245)',
+                    fontSize: 13,
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    transition: 'all 0.15s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = 'rgb(168, 130, 255)';
+                    e.currentTarget.style.background = 'rgba(168, 130, 255, 0.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'rgb(43, 52, 65)';
+                    e.currentTarget.style.background = 'rgb(15, 17, 21)';
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <MessageSquare className="w-4 h-4" style={{ color: 'rgb(168, 130, 255)' }} />
+                    <span>Send Feedback</span>
                   </div>
                   <ChevronRight className="w-4 h-4" style={{ color: 'rgb(116, 130, 148)' }} />
                 </button>

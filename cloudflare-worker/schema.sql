@@ -86,3 +86,18 @@ CREATE TABLE IF NOT EXISTS rate_limits (
   request_count INTEGER DEFAULT 0,
   PRIMARY KEY (device_id, hour)
 );
+
+-- User feedback
+CREATE TABLE IF NOT EXISTS feedback (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  name          TEXT,
+  email         TEXT,
+  category      TEXT NOT NULL,
+  message       TEXT NOT NULL,
+  app_version   TEXT,
+  os_version    TEXT,
+  created_at    TEXT DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_feedback_created_at ON feedback(created_at);
+CREATE INDEX IF NOT EXISTS idx_feedback_category ON feedback(category);
