@@ -33,6 +33,7 @@ export function Navbar() {
         backdropFilter: scrolled ? 'blur(16px) saturate(180%)' : 'none',
         borderBottom: scrolled ? '1px solid rgba(43, 52, 65, 0.5)' : '1px solid transparent',
         transition: 'all 0.3s ease',
+        willChange: 'background, backdrop-filter',
       }}
     >
       <div style={{ width: '100%', maxWidth: 1200, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

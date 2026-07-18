@@ -4,6 +4,8 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+  -webkit-overflow-scrolling: touch;
 }
 
 body {
@@ -15,6 +17,15 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  overscroll-behavior-y: contain;
+}
+
+html, body {
+  scroll-snap-type: y proximity;
+}
+
+section, footer {
+  scroll-snap-align: start;
 }
 
 ::selection {
@@ -139,4 +150,27 @@ body {
 .terminal-scrollbar::-webkit-scrollbar-thumb {
   background: #2B3441;
   border-radius: 3px;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B0D11;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2B3441;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3A4556;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
