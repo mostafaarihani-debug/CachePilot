@@ -136,6 +136,7 @@ export function trackLaunch(isFirstLaunch: boolean, startupTimeMs: number, setti
   autoScanOnStartup: boolean;
   autoScanInterval: number;
   showNotifications: boolean;
+  autoCleanAfterScan: boolean;
 }): void {
   if (!shouldTrack()) return;
   const deviceId = getOrCreateDeviceId();

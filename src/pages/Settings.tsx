@@ -3,7 +3,6 @@ import {
   Settings as SettingsIcon,
   Shield,
   Bell,
-  HardDrive,
   Info,
   Clock,
   Power,
@@ -15,12 +14,12 @@ import {
   Zap,
   Globe,
   Cpu,
-  Calendar,
   FolderOpen,
   ChevronRight,
   Eye,
   EyeOff,
   MessageSquare,
+  Sparkles,
 } from 'lucide-react';
 import type { AppSettings, AppInfo, UpdateStatus } from '../types';
 import { useToastStore } from '../store/toastStore';
@@ -85,7 +84,6 @@ export function Settings() {
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [appInfo, setAppInfo] = useState<AppInfo | null>(null);
   const [updateStatus, setUpdateStatus] = useState<UpdateStatus>({ status: 'idle' });
-  const [isTaskScheduled, setIsTaskScheduled] = useState(false);
   const [telemetryConsent, setTelemetryConsent] = useState<'yes' | 'no' | 'unset'>('unset');
   const addToast = useToastStore((s) => s.addToast);
 
@@ -95,7 +93,6 @@ export function Settings() {
     api.getSettings().then(setSettings).catch(() => {});
     api.getAppInfo().then(setAppInfo).catch(() => {});
     api.getUpdateStatus().then(setUpdateStatus).catch(() => {});
-    api.getScheduledScan().then(setIsTaskScheduled).catch(() => {});
     api.getTelemetryConsent().then(setTelemetryConsent).catch(() => {});
 
     const cleanup = api.onUpdateStatus((status: UpdateStatus) => {
@@ -137,26 +134,6 @@ export function Settings() {
 
   const handleQuitAndInstall = async () => {
     await window.electronAPI?.quitAndInstall();
-  };
-
-  const handleToggleScheduledScan = async (enabled: boolean) => {
-    const api = window.electronAPI;
-    if (!api) return;
-    if (enabled) {
-      const ok = await api.setScheduledScan(60);
-      setIsTaskScheduled(ok);
-      if (ok) {
-        addToast({ type: 'success', title: 'Scheduled Scan', message: 'Windows Task Scheduler set (every 60 minutes)' });
-      } else {
-        addToast({ type: 'error', title: 'Schedule Failed', message: 'Could not create Windows scheduled task' });
-      }
-    } else {
-      const ok = await api.cancelScheduledScan();
-      setIsTaskScheduled(!ok);
-      if (ok) {
-        addToast({ type: 'info', title: 'Schedule Cancelled', message: 'Windows scheduled scan removed' });
-      }
-    }
   };
 
   if (!settings) return null;
@@ -350,53 +327,35 @@ export function Settings() {
                     </div>
                     <div>
                       <p style={{ fontSize: 14, color: 'rgb(232, 237, 245)', fontWeight: 500 }}>Desktop notifications</p>
-                      <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)', marginTop: 1 }}>Get notified when cache exceeds threshold</p>
+                      <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)', marginTop: 1 }}>Show notification after background scan</p>
                     </div>
                   </div>
                   <Toggle enabled={settings.showNotifications} onToggle={() => update({ showNotifications: !settings.showNotifications })} />
                 </div>
 
-                {settings.showNotifications && (
-                  <>
-                    <div style={{ height: 1, background: 'rgb(43, 52, 65)', margin: '0 24px' }} />
-                    <div
-                      style={{
-                        padding: '14px 24px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                      }}
-                      className="hover:bg-surface/30"
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                        <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255, 107, 107, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <HardDrive className="w-4 h-4" style={{ color: 'rgb(255, 107, 107)' }} />
-                        </div>
-                        <p style={{ fontSize: 14, color: 'rgb(232, 237, 245)', fontWeight: 500 }}>Notify when cache exceeds</p>
-                      </div>
-                      <select
-                        value={settings.notificationThresholdMB}
-                        onChange={(e) => update({ notificationThresholdMB: Number(e.target.value) })}
-                        style={{
-                          padding: '8px 12px',
-                          borderRadius: 8,
-                          border: '1px solid rgb(43, 52, 65)',
-                          background: 'rgb(15, 17, 21)',
-                          color: 'rgb(232, 237, 245)',
-                          fontSize: 13,
-                          cursor: 'pointer',
-                          outline: 'none',
-                        }}
-                      >
-                        <option value={50}>50 MB</option>
-                        <option value={100}>100 MB</option>
-                        <option value={250}>250 MB</option>
-                        <option value={500}>500 MB</option>
-                        <option value={1024}>1 GB</option>
-                      </select>
+                <div style={{ height: 1, background: 'rgb(43, 52, 65)', margin: '0 24px' }} />
+
+                {/* Auto-clean after background scan */}
+                <div
+                  style={{
+                    padding: '14px 24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                  className="hover:bg-surface/30"
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(56, 210, 122, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Sparkles className="w-4 h-4" style={{ color: 'rgb(56, 210, 122)' }} />
                     </div>
-                  </>
-                )}
+                    <div>
+                      <p style={{ fontSize: 14, color: 'rgb(232, 237, 245)', fontWeight: 500 }}>Auto-clean after scan</p>
+                      <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)', marginTop: 1 }}>Automatically remove safe cache files after background scan</p>
+                    </div>
+                  </div>
+                  <Toggle enabled={settings.autoCleanAfterScan} onToggle={() => update({ autoCleanAfterScan: !settings.autoCleanAfterScan })} />
+                </div>
 
                 <div style={{ height: 1, background: 'rgb(43, 52, 65)', margin: '0 24px' }} />
 
@@ -420,32 +379,6 @@ export function Settings() {
                     </div>
                   </div>
                   <Toggle enabled={settings.showSafetyWarnings} onToggle={() => update({ showSafetyWarnings: !settings.showSafetyWarnings })} />
-                </div>
-
-                <div style={{ height: 1, background: 'rgb(43, 52, 65)', margin: '0 24px' }} />
-
-                {/* Scheduled scan */}
-                <div
-                  style={{
-                    padding: '14px 24px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
-                  className="hover:bg-surface/30"
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                    <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(77, 163, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Calendar className="w-4 h-4" style={{ color: 'rgb(77, 163, 255)' }} />
-                    </div>
-                    <div>
-                      <p style={{ fontSize: 14, color: 'rgb(232, 237, 245)', fontWeight: 500 }}>Scheduled scan</p>
-                      <p style={{ fontSize: 12, color: 'rgb(116, 130, 148)', marginTop: 1 }}>
-                        {isTaskScheduled ? 'Active — runs every hour via Windows Task Scheduler' : 'Runs scan automatically via Windows Task Scheduler'}
-                      </p>
-                    </div>
-                  </div>
-                  <Toggle enabled={isTaskScheduled} onToggle={() => handleToggleScheduledScan(!isTaskScheduled)} />
                 </div>
               </div>
             </div>

@@ -44,6 +44,7 @@ export function buildLaunchEvent(
     autoScanOnStartup: boolean;
     autoScanInterval: number;
     showNotifications: boolean;
+    autoCleanAfterScan: boolean;
   },
 ): TelemetryEvent {
   return {
@@ -53,7 +54,7 @@ export function buildLaunchEvent(
       is_first_launch: isFirstLaunch,
       is_startup_scan_enabled: settings.autoScanOnStartup,
       is_auto_scan_enabled: settings.autoScanInterval > 0,
-      is_background_scan_enabled: settings.showNotifications,
+      is_auto_clean_enabled: settings.autoCleanAfterScan,
       startup_time_ms: startupTimeMs,
     },
   };

@@ -78,7 +78,7 @@ export interface AppSettings {
   autoScanOnStartup: boolean;
   autoScanInterval: number;
   showNotifications: boolean;
-  notificationThresholdMB: number;
+  autoCleanAfterScan: boolean;
   showSafetyWarnings: boolean;
 }
 
@@ -162,9 +162,6 @@ export interface ElectronAPI {
   getUpdateStatus: () => Promise<UpdateStatus>;
   getAppInfo: () => Promise<AppInfo>;
   onUpdateStatus: (callback: (data: UpdateStatus) => void) => () => void;
-  setScheduledScan: (intervalMinutes: number) => Promise<boolean>;
-  getScheduledScan: () => Promise<boolean>;
-  cancelScheduledScan: () => Promise<boolean>;
   openLogsFolder: () => Promise<boolean>;
   activateLicense: (key: string) => Promise<{ success: boolean; status: LicenseStatus; error?: string }>;
   getLicenseStatus: () => Promise<LicenseStatus>;

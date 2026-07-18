@@ -33,9 +33,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getAppInfo: () => ipcRenderer.invoke('get-app-info'),
   onUpdateStatus: (callback: (data: unknown) => void) =>
     createListener('update-status', (data: unknown) => callback(data)),
-  setScheduledScan: (intervalMinutes: number) => ipcRenderer.invoke('set-scheduled-scan', intervalMinutes),
-  getScheduledScan: () => ipcRenderer.invoke('get-scheduled-scan'),
-  cancelScheduledScan: () => ipcRenderer.invoke('cancel-scheduled-scan'),
   openLogsFolder: () => ipcRenderer.invoke('open-logs-folder'),
   activateLicense: (key: string) => ipcRenderer.invoke('activate-license', key),
   getLicenseStatus: () => ipcRenderer.invoke('get-license-status'),

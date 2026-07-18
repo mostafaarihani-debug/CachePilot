@@ -62,7 +62,7 @@ interface AppSettings {
   autoScanOnStartup: boolean;
   autoScanInterval: number;
   showNotifications: boolean;
-  notificationThresholdMB: number;
+  autoCleanAfterScan: boolean;
   showSafetyWarnings: boolean;
 }
 
@@ -71,7 +71,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   autoScanOnStartup: true,
   autoScanInterval: 0,
   showNotifications: true,
-  notificationThresholdMB: 100,
+  autoCleanAfterScan: false,
   showSafetyWarnings: true,
 };
 
@@ -138,16 +138,40 @@ function performBackgroundScan() {
     const totalSize = results.reduce((sum, r) => sum + r.totalSize, 0);
     const totalItems = results.reduce((sum, r) => sum + r.itemCount, 0);
     log.info(`Background scan complete: ${(totalSize / 1024 / 1024).toFixed(1)} MB across ${totalItems} items`);
-    const thresholdBytes = settings.notificationThresholdMB * 1024 * 1024;
 
-    if (settings.showNotifications && totalSize >= thresholdBytes) {
+    let cleanedCount = 0;
+    let cleanedSize = 0;
+
+    if (settings.autoCleanAfterScan && totalItems > 0) {
+      const SAFE_CATEGORIES = ['browser-cache', 'temp-files', 'dns-cache', 'thumbnails', 'windows-store', 'microsoft-store', 'windows-update'];
+      const filesToClean: { path: string; size: number; lastModified: string }[] = [];
+      for (const result of results) {
+        if (SAFE_CATEGORIES.includes(result.categoryId)) {
+          for (const file of result.items) {
+            filesToClean.push(file);
+          }
+        }
+      }
+      if (filesToClean.length > 0) {
+        const cleanResult = deleteCacheFiles(filesToClean);
+        cleanedCount = cleanResult.deleted;
+        cleanedSize = filesToClean.reduce((sum, f) => sum + f.size, 0);
+        log.info(`Auto-clean: ${cleanedCount} files, ${(cleanedSize / 1024 / 1024).toFixed(1)} MB freed`);
+        trackCleanupStarted(`bg-${Date.now()}`);
+        trackCleanupCompleted(`bg-${Date.now()}`, [], cleanedCount, cleanedSize, 0);
+      }
+    }
+
+    if (settings.showNotifications && totalItems > 0) {
       const sizeMB = (totalSize / (1024 * 1024)).toFixed(0);
       const icon = getNotificationIcon();
+      const body = settings.autoCleanAfterScan && cleanedCount > 0
+        ? `Found ${totalItems} cache files (${sizeMB} MB). Auto-cleaned ${cleanedCount} safe files.`
+        : `Found ${totalItems} cache files (${sizeMB} MB). Click to review and clean.`;
       const n = new Notification({
         title: 'CachePilot',
-        body: `Found ${totalItems} cache files (${sizeMB} MB). Click to review and clean.`,
+        body,
         icon,
-        silent: false,
       });
       n.on('click', () => {
         showMainWindow();
@@ -335,6 +359,7 @@ if (!gotLock) {
       autoScanOnStartup: settings.autoScanOnStartup,
       autoScanInterval: settings.autoScanInterval,
       showNotifications: settings.showNotifications,
+      autoCleanAfterScan: settings.autoCleanAfterScan,
     });
 
     // Send license status to renderer after window is ready
@@ -520,58 +545,6 @@ ipcMain.handle('get-app-info', () => {
     log.error('get-app-info failed', err);
     return { version: '1.0.0', name: 'CachePilot', platform: process.platform, arch: process.arch, electronVersion: '', chromeVersion: '', nodeVersion: '' };
   }
-});
-
-const SCHEDULED_TASK_NAME = 'CachePilot Scheduled Scan';
-
-function createScheduledTask(intervalMinutes: number, exePath: string) {
-  try {
-    const cmd = `schtasks /create /tn "${SCHEDULED_TASK_NAME}" /tr "${exePath} --auto-start" /sc MINUTE /mo ${intervalMinutes} /f`;
-    execSync(cmd, { stdio: 'pipe' });
-    log.info(`Scheduled task created: every ${intervalMinutes} minutes`);
-    return true;
-  } catch (err) {
-    log.error('Failed to create scheduled task', err);
-    return false;
-  }
-}
-
-function deleteScheduledTask() {
-  try {
-    execSync(`schtasks /delete /tn "${SCHEDULED_TASK_NAME}" /f`, { stdio: 'pipe' });
-    log.info('Scheduled task deleted');
-    return true;
-  } catch (err) {
-    log.error('Failed to delete scheduled task', err);
-    return false;
-  }
-}
-
-function isScheduledTaskActive(): boolean {
-  try {
-    const result = execSync(`schtasks /query /tn "${SCHEDULED_TASK_NAME}" /fo CSV /nh`, { stdio: 'pipe' }).toString();
-    return result.includes(SCHEDULED_TASK_NAME);
-  } catch {
-    return false;
-  }
-}
-
-ipcMain.handle('set-scheduled-scan', (_event, intervalMinutes: number) => {
-  if (intervalMinutes <= 0) {
-    return deleteScheduledTask();
-  }
-  const exePath = app.isPackaged
-    ? path.join(path.dirname(app.getPath('exe')), 'CachePilot.exe')
-    : process.execPath;
-  return createScheduledTask(intervalMinutes, exePath);
-});
-
-ipcMain.handle('get-scheduled-scan', () => {
-  return isScheduledTaskActive();
-});
-
-ipcMain.handle('cancel-scheduled-scan', () => {
-  return deleteScheduledTask();
 });
 
 ipcMain.handle('open-logs-folder', async () => {

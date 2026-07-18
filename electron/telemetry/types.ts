@@ -27,7 +27,7 @@ export interface LaunchEvent extends BaseTelemetryEvent {
     is_first_launch: boolean;
     is_startup_scan_enabled: boolean;
     is_auto_scan_enabled: boolean;
-    is_background_scan_enabled: boolean;
+    is_auto_clean_enabled: boolean;
     startup_time_ms: number;
   };
 }
